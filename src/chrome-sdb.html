@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="js/aws_sdb.js"></script>
+    <script type="text/javascript" src="js/sha1.js"></script>
+    <script type="text/javascript" src="js/modal-account.js"></script>
+    <style>
+  		body { font-size: 62.5%; }
+  		label, input { display:block; }
+  		input.text { margin-bottom:12px; width:95%; padding: .4em; }
+  		fieldset { padding:0; border:0; margin-top:25px; }
+  		h1 { font-size: 1.2em; margin: .6em 0; }
+  		div#users-contain { width: 350px; margin: 20px 0; }
+  		div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
+  		div#users-contain table td, div#users-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
+  		.ui-dialog .ui-state-error { padding: .3em; }
+  		.validateTips { border: 1px solid transparent; padding: 0.3em; }
+  	</style>
+  </head>
+  <body>
+    <script>
+      var access_key_id = null;
+      var secret_access_key = null;
+      var current_account_id = localStorage['current_account_id'];
+      if(current_account_id != null) {
+        access_key_id = localStorage[current_account_id+".access_key_id"];
+        secret_access_key = localStorage[current_account_id+".secret_access_key"];
+      }
+      console.log(current_account_id)
+      console.log(access_key_id)
+      console.log(secret_access_key)
+      
+      if(access_key_id == null || secret_access_key == null) {
+        //
+      }
+      
+    
+      BIZO_AWS_ACCESS_KEY_ID = '01X4N7WQ4XDF09AVAS02'
+      BIZO_AWS_SECRET_ACCESS_KEY = '+iMBLEcp+ssh20tJOVd1G5t0mmcufFJ9tFLott7V'
+      sdb = new SDB(BIZO_AWS_ACCESS_KEY_ID, BIZO_AWS_SECRET_ACCESS_KEY,"sdb.amazonaws.com");
+      sdb.listDomains(function(results) {  
+        $("#results").text(results.domains.join(""));
+      });
+    </script>
+    <p id="results"></p>
+    
+    
+    
+    
+    
+    
+    <!-- MODAL - account mgmt -->
+    <div class="demo">
+
+    <div id="dialog-form" title="AWS Account Management">
+    	<p class="validateTips">All form fields are required.</p>
+
+    	<form>
+    	<fieldset>
+    		<label for="name">Account Name</label>
+    		<input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" />
+    		<label for="access_key_id">Access Key Id</label>
+    		<input type="text" name="access_key_id" id="access_key_id" value="" class="text ui-widget-content ui-corner-all" />
+    		<label for="secret_access_key">Secret Access Key</label>
+    		<input type="password" name="password" id="secret_access_key" value="" class="text ui-widget-content ui-corner-all" />
+    	</fieldset>
+    	</form>
+    </div>
+
+
+    <div id="users-contain" class="ui-widget">
+    	<h1>Accounts:</h1>
+    	<table id="users" class="ui-widget ui-widget-content">
+    		<thead>
+    			<tr class="ui-widget-header ">
+    				<th>Name</th>
+    				<th>Access Key Id</th>
+    				<th>Secret Access Key</th>
+    			</tr>
+    		</thead>
+    		<tbody>
+    			<tr>
+    				<td></td>
+    				<td></td>
+    				<td></td>
+    			</tr>
+    		</tbody>
+    	</table>
+    </div>
+    <button id="create-user">Create new account</button>
+
+    </div><!-- End demo -->
+    
+  </body>
+</html>

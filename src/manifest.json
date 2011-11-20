@@ -1,0 +1,19 @@
+{
+  "name" : "Simple DB Tool for Chrome",
+  "version" : "0.0.1",
+  "description" : "Tool for Amazon Web Services Simple DB",
+  "background_page" : "background.html",
+  "permissions": [
+    "http://ajax.googleapis.com/",
+    "*://*.amazonaws.com/",
+    "tabs"  
+  ],  
+  "browser_action" : {
+    "default_icon" : "images/sample-19.png"
+  },
+  "icons" : {
+    "16" : "images/sample-16.png",
+    "48" : "images/sample-48.png",
+    "128" : "images/sample-128.png"
+  }
+}
