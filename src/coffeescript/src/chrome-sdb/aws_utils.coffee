@@ -1,11 +1,12 @@
 # @import sha1_utils.coffee
+# @import ../../vendor/lib/date.js
 
 AwsUtils = (() ->
 
   zeropad = (to_pad)->
     to_pad = to_pad.toString()
-    zero_padded = "0#{to_pad}" if to_pad.length < 2
-    zero_padded
+    to_pad = "0#{to_pad}" if to_pad.length < 2
+    to_pad
   
   yyyymmdd = (date)->
     [
@@ -21,17 +22,17 @@ AwsUtils = (() ->
       zeropad(date.getUTCSeconds())
     ].join(':');
     
-  sortLowerCase = (str1, str2)->
-    if (s1 == s2) then 0 else (str1.toLowerCase() > str2.toLowerCase() ? 1 : -1)
+  sort_lower_case = (s1, s2)->
+    if (s1 == s2) then 0 else (s1.toLowerCase() > s2.toLowerCase() ? 1 : -1)
 
   pub = {}
   
-  pub.dateTimeFormat = (date=new Date())->
-    "#{yyyymmdd()}T#{hhmmss}.000Z"
+  pub.date_time_format = (date=new Date())->
+    "#{yyyymmdd(date)}T#{hhmmss(date)}.000Z"
   
-  pub.generateSignature = (params, aws_secret_key)->
-    param_keys = (item for item in params)
-    param_keys.sort(sortLowerCase)
+  pub.generate_sig = (params, aws_secret_key)->
+    param_keys = (k for k,v of params)
+    param_keys.sort(sort_lower_case)
     to_sign = for k in param_keys
       "#{k}#{params[k]}"
     return SHA1.b64_hmac_sha1(aws_secret_key, to_sign.join(""))
