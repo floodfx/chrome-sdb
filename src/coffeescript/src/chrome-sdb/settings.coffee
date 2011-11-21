@@ -11,15 +11,15 @@ class Settings
     @version=version
     this
   
-  access_key:()->
+  get_access_key:()->
     @access_key
   
-  secret_key:()->
+  get_secret_key:()->
     @secret_key
     
-  region:()->
+  get_region:()->
     @region
   
-  version:()->
+  get_version:()->
     @version
   

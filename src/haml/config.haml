@@ -1,0 +1,73 @@
+!!! 5
+%html{:xmlns => "http://www.w3.org/1999/xhtml", "xml:lang" => "en", :lang => "en"}
+  %head
+    %title  
+      =@title
+    %link(rel="stylesheet" href="css/bootstrap.css")
+    %link(rel="stylesheet" href="css/bootstrap-overrides.css")
+    %link(href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono" rel='stylesheet' type='text/css')
+    
+    %meta(charset="utf-8")
+    %meta(name="viewport" content="initial-scale=1.0, user-scalable=no")
+    %script(type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js")
+    %script(type="text/javascript" src="js/chrome-sdb.js")
+    %script(type="text/javascript" src="js/bootstrap-twipsy.js")
+    %script(type="text/javascript" src="js/bootstrap-popover.js")
+    %script(type="text/javascript" src="js/bootstrap-dropdown.js")
+    %script(type="text/javascript" src="js/bootstrap-scrollspy.js")
+  %body
+  
+    .topbar
+      .fill
+        .container
+          %a.brand(href="/chrome-sdb.html")
+            Simple DB Tool
+          %ul.nav
+            %li
+              %a(href="/chrome-sdb.html")
+                Query
+            %li.active
+              %a(href="/config.html")
+                Configure
+            %li
+              %a(href="/about.html") 
+                About
+                  
+    .container 
+      .row
+        .span4
+          %h2
+            Domains
+          %table
+            %thead
+              %tr
+                %th
+                  Domain
+            %tbody
+              %tr
+                %td
+                  No Domains...  
+                  %a(href="#create") Create one?
+                
+      
+        .span8.offset2   
+          %form.form-stacked
+            %fieldset
+              .clearfix
+                %label.large(for="query")
+                  Query
+                .input
+                  %textarea.xxlarge{:name => "query"}
+                  %span.help-block
+                    Check out the docs...
+              %input.btn.primary.pull-right(type="button" value="Run Query" onclick="alert('click')")      
+        
+      
+    
+    .container
+      .fill
+        .row
+          .span16
+            %footer.actions
+              If you find this tool useful, consider purchasing it.
+    

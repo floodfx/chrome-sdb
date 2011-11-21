@@ -3,9 +3,9 @@ class Profile
   
   constructor:(@name, @settings)->
   
-  name:()->
+  get_name:()->
     @name
   
-  settings:()->
+  get_settings:()->
     @settings
     

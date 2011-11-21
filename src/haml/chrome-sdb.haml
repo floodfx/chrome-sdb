@@ -1,0 +1,103 @@
+!!! 5
+%html{:xmlns => "http://www.w3.org/1999/xhtml", "xml:lang" => "en", :lang => "en"}
+  %head
+    %title  
+      =@title
+    %link(rel="stylesheet" href="css/bootstrap.css")
+    %link(rel="stylesheet" href="css/bootstrap-overrides.css")
+    %link(href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono" rel='stylesheet' type='text/css')
+    
+    %meta(charset="utf-8")
+    %meta(name="viewport" content="initial-scale=1.0, user-scalable=no")
+    %script(type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js")
+    %script(type="text/javascript" src="js/chrome-sdb.js")
+    %script(type="text/javascript" src="js/bootstrap-twipsy.js")
+    %script(type="text/javascript" src="js/bootstrap-popover.js")
+    %script(type="text/javascript" src="js/bootstrap-dropdown.js")
+    %script(type="text/javascript" src="js/bootstrap-scrollspy.js")
+  %body
+  
+    .topbar
+      .fill
+        .container
+          %a.brand(href="/chrome-sdb.html")
+            Simple DB Tool
+          %ul.nav
+            %li.active
+              %a(href="/chrome-sdb.html")
+                Query
+            %li
+              %a(href="/config.html")
+                Configure
+            %li
+              %a(href="/about.html") 
+                About
+                  
+    .container 
+      .row     
+        .span16.page-header
+          %h1
+            Simple DB Tool
+            %small
+              Making Simple DB simpler...
+
+      .row
+        .span12.offset4#message_box(style="display:none;")
+          
+
+      .row
+        .span-one-third
+          %h2
+            Query Tool
+          %p
+            Enter a query in the textbox on the right.  
+        
+        .span-two-thirds
+          %input.btn.primary.pull-right(type="button" value="Run Query" onclick="alert('click')")      
+          %h3(for="query")
+            Query
+          .input
+            %textarea.xxlarge{:name => "query", :rows => 3}
+            %span.help-block
+              Check out the docs...
+        
+      .row
+        .span-two-thrids.offset-one-third
+          %h3
+            Query Results
+          %table.condensed-table#results_table
+            %thead
+              %tr
+                %td
+                  Items
+            %tbody
+              %tr
+                %td
+                  No query run...
+      
+      
+      
+      .row(style="padding-top:50px")        
+        .span16.page-header
+          %h2
+            Domains
+            %small
+              Creation, Deletion and Metadata
+          %table
+            %thead
+              %tr
+                %th
+                  Domain
+            %tbody
+              %tr
+                %td
+                  No Domains...  
+                  %a(href="#create") Create one?
+    
+    .container
+      .fill
+        .row
+          .span16
+            %footer.actions
+              If you find this tool useful, consider purchasing it.
+    

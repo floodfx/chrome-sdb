@@ -24,12 +24,12 @@
             Simple DB Tool
           </a>
           <ul class='nav'>
-            <li class='active'>
+            <li>
               <a href='/chrome-sdb.html'>
                 Query
               </a>
             </li>
-            <li>
+            <li class='active'>
               <a href='/config.html'>
                 Configure
               </a>
@@ -45,70 +45,9 @@
     </div>
     <div class='container'>
       <div class='row'>
-        <div class='span16 page-header'>
-          <h1>
-            Simple DB Tool
-            <small>
-              Making Simple DB simpler...
-            </small>
-          </h1>
-        </div>
-      </div>
-      <div class='row'>
-        <div class='span12 offset4' id='message_box' style='display:none;'></div>
-      </div>
-      <div class='row'>
-        <div class='span-one-third'>
-          <h2>
-            Query Tool
-          </h2>
-          <p>
-            Enter a query in the textbox on the right.
-          </p>
-        </div>
-        <div class='span-two-thirds'>
-          <input class='btn primary pull-right' onclick="alert('click')" type='button' value='Run Query' />
-          <h3 for='query'>
-            Query
-          </h3>
-          <div class='input'>
-            <textarea class='xxlarge' name='query' rows='3'></textarea>
-            <span class='help-block'>
-              Check out the docs...
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class='row'>
-        <div class='span-two-thrids offset-one-third'>
-          <h3>
-            Query Results
-          </h3>
-          <table class='condensed-table' id='results_table'>
-            <thead>
-              <tr>
-                <td>
-                  Items
-                </td>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  No query run...
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class='row' style='padding-top:50px'>
-        <div class='span16 page-header'>
+        <div class='span4'>
           <h2>
             Domains
-            <small>
-              Creation, Deletion and Metadata
-            </small>
           </h2>
           <table>
             <thead>
@@ -127,6 +66,24 @@
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class='span8 offset2'>
+          <form class='form-stacked'>
+            <fieldset>
+              <div class='clearfix'>
+                <label class='large' for='query'>
+                  Query
+                </label>
+                <div class='input'>
+                  <textarea class='xxlarge' name='query'></textarea>
+                  <span class='help-block'>
+                    Check out the docs...
+                  </span>
+                </div>
+              </div>
+              <input class='btn primary pull-right' onclick="alert('click')" type='button' value='Run Query' />
+            </fieldset>
+          </form>
         </div>
       </div>
     </div>
