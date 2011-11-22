@@ -54,15 +54,13 @@ class SimpleDB
     
   
   list_domains: (callback, max_domains=100, next_token=null)->
-    action = "ListDomains"
-    # validate params    
     throw "Max domains must be between 1 and 100" if max_domains not in [1..100]
     params = {      
       MaxNumberOfDomains:max_domains
     }
     params["NextToken"] = next_token if next_token
 
-    this.ajax_request(this.build_request_url(action, params), (result, data)->
+    this.ajax_request(this.build_request_url("ListDomains", params), (result, data)->
       if(result.error != null) 
         callback(result) # TODO handle better than just return the error
       domains = []
@@ -75,10 +73,9 @@ class SimpleDB
     )
     
   
-  domainMetadata: (domain_name, callback)->
-    action = "DomainMetadata"
-
-    this.ajax_request(this.build_request_url(action, {"DomainName":domain_name}), (result, data)->
+  domain_metadata: (domain_name, callback)->
+  
+    this.ajax_request(this.build_request_url("DomainMetadata", {"DomainName":domain_name}), (result, data)->
       if(result.error != null) 
         callback(result)# just return the error
       result.creation_date_time = $("CreationDateTime", data).text()
@@ -118,3 +115,30 @@ class SimpleDB
       callback(result)
     )
     
+    
+  get_attributes: (domain_name, item_name, callback, attribute_names=[])->
+    params = {
+      DomainName:domain_name, 
+      ItemName:item_name
+    }
+    for i in [0...attribute_names.length]
+      params["AttributeName.#{i}"] = attribute_names[i]
+  
+    this.ajax_request(this.build_request_url("GetAttributes", params), (result, data)->
+      if(result.error != null) 
+        callback(result)
+      attributes = {}
+      $("Attribute", data).each((i)->
+        name = $("Name", $(this)).text()
+        value = $("Value", $(this)).text()
+        attributes[name] = [] unless attributes[name]
+        attributes[name].push(value)
+      )
+      result.attributes = attributes
+      callback(result)
+    )   
+    
+    
+    
+
+
