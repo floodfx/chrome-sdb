@@ -148,7 +148,6 @@ class SimpleDB
     attr_param_count = 1
     for attr_object in attribute_objects
       attr_values = attr_object["values"]
-      console.log("attr_object",attr_object)
       for v in attr_values
         params["Attribute.#{attr_param_count}.Name"] = attr_object["name"]
         params["Attribute.#{attr_param_count}.Value"] = v
@@ -160,5 +159,24 @@ class SimpleDB
       callback(result)
     )
     
+  delete_attributes: (domain_name, item_name, attribute_objects, callback)->
+    params = {
+      DomainName:domain_name, 
+      ItemName:item_name
+    }
+    attr_param_count = 1
+    for attr_object in attribute_objects     
+      attr_values = attr_object["values"]
+      if attr_values
+        for v in attr_values
+          params["Attribute.#{attr_param_count}.Name"] = attr_object["name"]
+          params["Attribute.#{attr_param_count}.Value"] = v
+          attr_param_count += 1 
+      else
+        params["Attribute.#{attr_param_count}.Name"] = attr_object["name"]
+        attr_param_count += 1 
 
+    this.ajax_request(this.build_request_url("DeleteAttributes", params), (result, data)->
+      callback(result)
+    )
 
