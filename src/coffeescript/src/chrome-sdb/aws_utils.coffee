@@ -23,7 +23,7 @@ AwsUtils = (() ->
     ].join(':');
     
   sort_lower_case = (s1, s2)->
-    if (s1 == s2) then 0 else (s1.toLowerCase() > s2.toLowerCase() ? 1 : -1)
+    if (s1 == s2) then 0 else (if s1.toLowerCase() > s2.toLowerCase() then 1 else -1)
 
   pub = {}
   

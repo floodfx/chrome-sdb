@@ -138,7 +138,27 @@ class SimpleDB
       callback(result)
     )   
     
-    
+  put_attributes: (domain_name, item_name, attribute_objects, callback)->
+    params = {
+      DomainName:domain_name, 
+      ItemName:item_name
+    }
+    # format of attribute_objects is:
+    # [{name:attr_name,values:[attr_val1,attr_val2],replace:boolean}]
+    attr_param_count = 1
+    for attr_object in attribute_objects
+      attr_values = attr_object["values"]
+      console.log("attr_object",attr_object)
+      for v in attr_values
+        params["Attribute.#{attr_param_count}.Name"] = attr_object["name"]
+        params["Attribute.#{attr_param_count}.Value"] = v
+        if attr_object["replace"] && attr_object["replace"] == true
+          params["Attribute.#{attr_param_count}.Replace"] = true 
+        attr_param_count += 1
+
+    this.ajax_request(this.build_request_url("PutAttributes", params), (result, data)->
+      callback(result)
+    )
     
 
 
