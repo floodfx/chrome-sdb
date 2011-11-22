@@ -8,7 +8,10 @@ class SimpleDB
   set_profile:(profile)->
     @profile=profile
     
-  build_request_url: (action,params)->
+  default_callback:(results)->
+    console.log(results)
+    
+  build_request_url: (action, params)->
     # add required params
     params["Action"] = action
     params["Timestamp"] = AwsUtils.date_time_format()
@@ -53,7 +56,7 @@ class SimpleDB
     )
     
   
-  list_domains: (callback, max_domains=100, next_token=null)->
+  list_domains: (callback=this.this.default_callback, max_domains=100, next_token=null)->
     throw "Max domains must be between 1 and 100" if max_domains not in [1..100]
     params = {      
       MaxNumberOfDomains:max_domains
@@ -73,7 +76,7 @@ class SimpleDB
     )
     
   
-  domain_metadata: (domain_name, callback)->
+  domain_metadata: (domain_name, callback=this.default_callback)->
   
     this.ajax_request(this.build_request_url("DomainMetadata", {"DomainName":domain_name}), (result, data)->
       if(result.error != null) 
@@ -90,7 +93,7 @@ class SimpleDB
     )
     
     
-  select: (expression, callback, next_token=null)->
+  select: (expression, callback=this.default_callback, next_token=null)->
     params = {
       SelectExpression:expression
     }
@@ -116,7 +119,7 @@ class SimpleDB
     )
     
     
-  get_attributes: (domain_name, item_name, callback, attribute_names=[])->
+  get_attributes: (domain_name, item_name, callback=this.default_callback, attribute_names=[])->
     params = {
       DomainName:domain_name, 
       ItemName:item_name
@@ -138,7 +141,7 @@ class SimpleDB
       callback(result)
     )   
     
-  put_attributes: (domain_name, item_name, attribute_objects, callback)->
+  put_attributes: (domain_name, item_name, attribute_objects, callback=this.default_callback)->
     params = {
       DomainName:domain_name, 
       ItemName:item_name
@@ -160,7 +163,7 @@ class SimpleDB
       callback(result)
     )
     
-  delete_attributes: (domain_name, item_name, attribute_objects, callback)->
+  delete_attributes: (domain_name, item_name, attribute_objects, callback=this.default_callback)->
     params = {
       DomainName:domain_name, 
       ItemName:item_name
@@ -185,7 +188,7 @@ class SimpleDB
       callback(result)
     )
   
-  batch_delete_attributes: (domain_name, item_attribute_objects, callback)->
+  batch_delete_attributes: (domain_name, item_attribute_objects, callback=this.default_callback)->
     params = {
       DomainName:domain_name
     }
@@ -214,7 +217,7 @@ class SimpleDB
       callback(result)
     )
      
-  batch_put_attributes: (domain_name, item_attribute_objects, callback)->
+  batch_put_attributes: (domain_name, item_attribute_objects, callback=this.default_callback)->
     params = {
       DomainName:domain_name
     }
@@ -241,13 +244,13 @@ class SimpleDB
       callback(result)
     ) 
   
-  create_domain: (domain_name, callback)->
+  create_domain: (domain_name, callback=this.default_callback)->
     this.ajax_request(this.build_request_url("CreateDomain", {"DomainName":domain_name}), (result, data)->
       #TODO handle error
       callback(result)
     )
 
-  delete_domain: (domain_name, callback)->
+  delete_domain: (domain_name, callback=this.default_callback)->
     this.ajax_request(this.build_request_url("DeleteDomain", {"DomainName":domain_name}), (result, data)->
       #TODO handle error
       callback(result)
