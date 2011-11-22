@@ -61,8 +61,8 @@ class SimpleDB
       MaxNumberOfDomains:max_domains
     }
     params["NextToken"] = next_token if next_token
-    
-    result_handler = (result, data)->
+
+    this.ajax_request(this.build_request_url(action, params), (result, data)->
       if(result.error != null) 
         callback(result) # TODO handle better than just return the error
       domains = []
@@ -72,14 +72,12 @@ class SimpleDB
       result.domains = domains
       result.next_token = $("NextToken", data).text()
       callback(result)
-
-    this.ajax_request(this.build_request_url(action, params), result_handler)
+    )
     
   
   domainMetadata: (domain_name, callback)->
     action = "DomainMetadata"
 
-    # use jquery to make request
     this.ajax_request(this.build_request_url(action, {"DomainName":domain_name}), (result, data)->
       if(result.error != null) 
         callback(result)# just return the error
@@ -91,6 +89,32 @@ class SimpleDB
       result.attribute_value_count = parseInt($("AttributeValueCount", data).text())
       result.attribute_values_size_bytes = parseInt($("AttributeValuesSizeBytes", data).text())
       result.timestamp = $("Timestamp", data).text()
+      callback(result)
+    )
+    
+    
+  select: (expression, callback, next_token=null)->
+    params = {
+      SelectExpression:expression
+    }
+    params["NextToken"] = next_token if next_token                                 
+  
+    this.ajax_request(this.build_request_url("Select", params), (result, data)->
+      if(result.error != null) 
+        callback(result)
+      items = []
+      $("Item", data).each((i)->
+        item = {attrs:{},name:$("Name:first", $(this)).text()}
+        $("Attribute", $(this)).each((j)->
+          name = $("Name", $(this)).text()
+          val  = $("Value", $(this)).text()
+          item["attrs"][name] = [] unless item["attrs"][name]
+          item["attrs"][name].push(val)
+        )
+        items.push(item)
+      )
+      result.items = items
+      result.next_token = $("NextToken", data).text()
       callback(result)
     )
     
