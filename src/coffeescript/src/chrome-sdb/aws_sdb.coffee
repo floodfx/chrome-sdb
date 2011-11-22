@@ -145,7 +145,7 @@ class SimpleDB
     }
     # format of attribute_objects is:
     # [{name:attr_name,values:[attr_val1,attr_val2],replace:boolean}]
-    attr_param_count = 1
+    attr_param_count = 0
     for attr_object in attribute_objects
       attr_values = attr_object["values"]
       for v in attr_values
@@ -156,6 +156,7 @@ class SimpleDB
         attr_param_count += 1
 
     this.ajax_request(this.build_request_url("PutAttributes", params), (result, data)->
+      #TODO handle error
       callback(result)
     )
     
@@ -164,7 +165,10 @@ class SimpleDB
       DomainName:domain_name, 
       ItemName:item_name
     }
-    attr_param_count = 1
+    
+    # format of attribute_objects is:
+    # [{name:attr_name,values:[attr_val1,attr_val2]}]
+    attr_param_count = 0
     for attr_object in attribute_objects     
       attr_values = attr_object["values"]
       if attr_values
@@ -177,6 +181,75 @@ class SimpleDB
         attr_param_count += 1 
 
     this.ajax_request(this.build_request_url("DeleteAttributes", params), (result, data)->
+      #TODO handle error
+      callback(result)
+    )
+  
+  batch_delete_attributes: (domain_name, item_attribute_objects, callback)->
+    params = {
+      DomainName:domain_name
+    }
+    
+    # TODO make these Classes
+    #format of item_attribute_objects is
+    #[{item_name:name,item_attrs:[{name:attr_name,values:[attr_val1,attr_val2]}]},
+    # {item_name:name2,item_attrs:[{name:attr_name,values:[attr_val1,attr_val2]}]}]
+    for i in [0...item_attribute_objects.length]
+      item_attr_obj = item_attribute_objects[i]
+      item_name = item_attr_obj["item_name"]
+      params["Item.#{i}.ItemName"] = item_name
+      attr_param_count = 0
+      for attr_object in item_attr_obj["item_attrs"]     
+        attr_values = attr_object["values"]
+        if attr_values
+          for v in attr_values
+            params["Item.#{i}.Attribute.#{attr_param_count}.Name"] = attr_object["name"]
+            params["Item.#{i}.Attribute.#{attr_param_count}.Value"] = v
+            attr_param_count += 1 
+        else
+          params["Item.#{i}.Attribute.#{attr_param_count}.Name"] = attr_object["name"]
+          attr_param_count += 1
+    this.ajax_request(this.build_request_url("BatchDeleteAttributes", params), (result, data)->
+      #TODO handle error
+      callback(result)
+    )
+     
+  batch_put_attributes: (domain_name, item_attribute_objects, callback)->
+    params = {
+      DomainName:domain_name
+    }
+
+    # TODO make these Classes
+    #format of item_attribute_objects is
+    #[{item_name:name,item_attrs:[{name:attr_name,values:[attr_val1,attr_val2],replace:boolean}],
+    # {item_name:name2,item_attrs:[{name:attr_name,values:[attr_val1,attr_val2],replace:boolean}]}]
+    for i in [0...item_attribute_objects.length]
+      item_attr_obj = item_attribute_objects[i]
+      item_name = item_attr_obj["item_name"]
+      params["Item.#{i}.ItemName"] = item_name
+      attr_param_count = 0
+      for attr_object in item_attr_obj["item_attrs"]
+        attr_values = attr_object["values"]
+        for v in attr_values
+          params["Item.#{i}.Attribute.#{attr_param_count}.Name"] = attr_object["name"]
+          params["Item.#{i}.Attribute.#{attr_param_count}.Value"] = v
+          if attr_object["replace"] && attr_object["replace"] == true
+            params["Item.#{i}.Attribute.#{attr_param_count}.Replace"] = true 
+          attr_param_count += 1
+    this.ajax_request(this.build_request_url("BatchPutAttributes", params), (result, data)->
+      #TODO handle error
+      callback(result)
+    ) 
+  
+  create_domain: (domain_name, callback)->
+    this.ajax_request(this.build_request_url("CreateDomain", {"DomainName":domain_name}), (result, data)->
+      #TODO handle error
+      callback(result)
+    )
+
+  delete_domain: (domain_name, callback)->
+    this.ajax_request(this.build_request_url("DeleteDomain", {"DomainName":domain_name}), (result, data)->
+      #TODO handle error
       callback(result)
     )
 
