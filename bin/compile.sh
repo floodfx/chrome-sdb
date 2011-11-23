@@ -19,8 +19,4 @@ bundle exec dependence $SRC_DIR/coffeescript/src -o $COMPILED_DIR/js -b -c
 bundle exec dependence $SRC_DIR/coffeescript/test -o $COMPILED_DIR/js/test -b
 
 # copy to public
-FILE_TO_COPY=$PROJECT_NAME.js
-if [ $USE_MINIFIED ]; then
-  FILE_TO_COPY=$PROJECT_NAME.min.js
-fi
-cp -f $COMPILED_DIR/js/$FILE_TO_COPY $SRC_DIR/js/$PROJECT_NAME.js
+cp -f $COMPILED_DIR/js/*.js $SRC_DIR/js/

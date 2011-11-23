@@ -23,7 +23,7 @@ class SimpleDB
       k + "=" + encodeURIComponent(v)
     @sdb_base_url + encoded_params.join("&")
     
-  parse_metadata: (data, text_status, req_url)->
+  @parse_metadata: (data, text_status, req_url)->
     {
       meta:{
         req_id:$("RequestId", data).text(),
@@ -35,11 +35,11 @@ class SimpleDB
     
   ajax_request: (url, callback, type="GET", error_callback=callback)->
     # use jquery to make request
-    req_success_callback = (data, text_status)=>
-      callback(this.parse_metadata(data,text_status, url), data)
+    req_success_callback = (data, text_status)->
+      callback(SimpleDB.parse_metadata(data,text_status, url), data)
       
-    req_error_callback = (xhr, text_status, error)=>
-      result = this.parse_metadata(xhr.responseXML, text_status, url)
+    req_error_callback = (xhr, text_status, error)->
+      result = SimpleDB.parse_metadata(xhr.responseXML, text_status, url)
       result.error = {
         msg:$("Message", xhr.responseXML).text(),
         code:$("Code", xhr.responseXML).text()
@@ -56,7 +56,7 @@ class SimpleDB
     )
     
   
-  list_domains: (callback=this.this.default_callback, max_domains=100, next_token=null)->
+  list_domains: (callback=this.default_callback, max_domains=100, next_token=null)->
     throw "Max domains must be between 1 and 100" if max_domains not in [1..100]
     params = {      
       MaxNumberOfDomains:max_domains
@@ -64,7 +64,7 @@ class SimpleDB
     params["NextToken"] = next_token if next_token
 
     this.ajax_request(this.build_request_url("ListDomains", params), (result, data)->
-      if(result.error != null) 
+      if(result.error?) 
         callback(result) # TODO handle better than just return the error
       domains = []
       $("DomainName", data).each((i)->
@@ -79,7 +79,7 @@ class SimpleDB
   domain_metadata: (domain_name, callback=this.default_callback)->
   
     this.ajax_request(this.build_request_url("DomainMetadata", {"DomainName":domain_name}), (result, data)->
-      if(result.error != null) 
+      if(result.error?)  
         callback(result)# just return the error
       result.creation_date_time = $("CreationDateTime", data).text()
       result.item_count = parseInt($("ItemCount", data).text())
@@ -100,7 +100,7 @@ class SimpleDB
     params["NextToken"] = next_token if next_token                                 
   
     this.ajax_request(this.build_request_url("Select", params), (result, data)->
-      if(result.error != null) 
+      if(result.error?)  
         callback(result)
       items = []
       $("Item", data).each((i)->
@@ -128,7 +128,7 @@ class SimpleDB
       params["AttributeName.#{i}"] = attribute_names[i]
   
     this.ajax_request(this.build_request_url("GetAttributes", params), (result, data)->
-      if(result.error != null) 
+      if(result.error?)  
         callback(result)
       attributes = {}
       $("Attribute", data).each((i)->

@@ -9,11 +9,11 @@
     "tabs"  
   ],  
   "browser_action" : {
-    "default_icon" : "images/sample-19.png"
+    "default_icon" : "images/chrome-sdb-19.png"
   },
   "icons" : {
-    "16" : "images/sample-16.png",
-    "48" : "images/sample-48.png",
-    "128" : "images/sample-128.png"
+    "16" : "images/chrome-sdb-16.png",
+    "48" : "images/chrome-sdb-48.png",
+    "128" : "images/chrome-sdb-128.png"
   }
 }

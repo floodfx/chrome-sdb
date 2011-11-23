@@ -10,11 +10,12 @@
     <meta charset='utf-8' />
     <meta content='initial-scale=1.0, user-scalable=no' name='viewport' />
     <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js' type='text/javascript'></script>
-    <script src='js/chrome-sdb.js' type='text/javascript'></script>
+    <script src='js/config.js' type='text/javascript'></script>
     <script src='js/bootstrap-twipsy.js' type='text/javascript'></script>
     <script src='js/bootstrap-popover.js' type='text/javascript'></script>
     <script src='js/bootstrap-dropdown.js' type='text/javascript'></script>
     <script src='js/bootstrap-scrollspy.js' type='text/javascript'></script>
+    <script src='js/bootstrap-modal.js' type='text/javascript'></script>
   </head>
   <body>
     <div class='topbar'>
@@ -43,25 +44,89 @@
         </div>
       </div>
     </div>
+    <div class='modal hide fade' id='create_profile_modal' style='display: none;'>
+      <div class='modal-header'>
+        <a class='close' href='#' id='close-model'>
+          x
+        </a>
+        <h3>
+          Save a Profile
+        </h3>
+      </div>
+      <div class='modal-body'>
+        <form>
+          <fieldset>
+            <div class='clearfix'>
+              <label for='name'>
+                Name
+              </label>
+              <div class='input'>
+                <input id='profile_name' name='name' size='100' type='text' />
+                <span class='help-block'>
+                  Something like "My Company" or "Personal Account"
+                </span>
+              </div>
+              <label for='access_key'>
+                AWS Access Key ID
+              </label>
+              <div class='input'>
+                <input id='profile_aws_access_key' name='access_key' size='100' type='text' />
+                <span class='help-block'>
+                  AWS Access Key ID
+                </span>
+              </div>
+              <label for='secret_key'>
+                AWS Secret Access Key
+              </label>
+              <div class='input'>
+                <input id='profile_aws_secret_key' name='secret_key' size='100' type='password' />
+                <span class='help-block'>
+                  AWS Secret Access Key
+                </span>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class='modal-footer'>
+        <a class='btn primary' href='#' id='save_profile'>
+          Save
+        </a>
+        <a class='btn secondary' href='#' id='cancel_profile'>
+          Cancel
+        </a>
+      </div>
+    </div>
     <div class='container'>
       <div class='row'>
-        <div class='span4'>
+        <div class='span12' id='message_box' style='display:none;'></div>
+      </div>
+      <div class='row'>
+        <div class='span6'>
           <h2>
-            Domains
+            Profiles
           </h2>
-          <table>
+          <a class='btn primary pull-right' data-backdrop='static' data-controls-modal='create_profile_modal' href='#' id='create_profile'>
+            Create a new profile
+          </a>
+          <table class='bordered-table zebra-striped condensed-table' id='profiles_table'>
             <thead>
               <tr>
                 <th>
-                  Domain
+                  Name
+                </th>
+                <th>
+                  Edit
+                </th>
+                <th>
+                  In Use
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>
-                  No Domains...
-                  <a href='#create'>Create one?</a>
+                <td colspan='3'>
+                  No profiles...
                 </td>
               </tr>
             </tbody>

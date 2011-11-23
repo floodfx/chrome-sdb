@@ -55,36 +55,38 @@
         </div>
       </div>
       <div class='row'>
-        <div class='span12 offset4' id='message_box' style='display:none;'></div>
+        <div class='span12' id='message_box' style='display:none;'></div>
       </div>
       <div class='row'>
-        <div class='span-one-third'>
+        <div class='span12'>
+          <div class='clearfix'>
+            <h3 for='query'>
+              Query
+            </h3>
+            <input class='btn primary pull-right' onclick="alert('click')" type='button' value='Run Query' />
+            <div class='input'>
+              <textarea class='xxlarge' name='query' rows='3'></textarea>
+              <span class='help-block'>
+                Check out the docs...
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class='span4'>
           <h2>
             Query Tool
           </h2>
           <p>
-            Enter a query in the textbox on the right.
+            Enter a query expression and click 'Run Query'.  The results will be displayed below.
           </p>
-        </div>
-        <div class='span-two-thirds'>
-          <input class='btn primary pull-right' onclick="alert('click')" type='button' value='Run Query' />
-          <h3 for='query'>
-            Query
-          </h3>
-          <div class='input'>
-            <textarea class='xxlarge' name='query' rows='3'></textarea>
-            <span class='help-block'>
-              Check out the docs...
-            </span>
-          </div>
         </div>
       </div>
       <div class='row'>
-        <div class='span-two-thrids offset-one-third'>
+        <div class='span12'>
           <h3>
             Query Results
           </h3>
-          <table class='condensed-table' id='results_table'>
+          <table class='bordered-table zebra-striped condensed-table' id='query_results_table'>
             <thead>
               <tr>
                 <td>
@@ -110,19 +112,28 @@
               Creation, Deletion and Metadata
             </small>
           </h2>
-          <table>
+        </div>
+      </div>
+      <div class='row'>
+        <div class='span-one-third'>
+          <a class='btn primary' href='#' id='create_domain'>
+            Create Domain
+          </a>
+          <table class='bordered-table zebra-striped condensed-table' id='domains_table'>
             <thead>
               <tr>
                 <th>
                   Domain
                 </th>
+                <th>
+                  Metadata
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>
+                <td rowspan='2'>
                   No Domains...
-                  <a href='#create'>Create one?</a>
                 </td>
               </tr>
             </tbody>

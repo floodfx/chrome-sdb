@@ -10,11 +10,12 @@
     %meta(charset="utf-8")
     %meta(name="viewport" content="initial-scale=1.0, user-scalable=no")
     %script(type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js")
-    %script(type="text/javascript" src="js/chrome-sdb.js")
+    %script(type="text/javascript" src="js/config.js")
     %script(type="text/javascript" src="js/bootstrap-twipsy.js")
     %script(type="text/javascript" src="js/bootstrap-popover.js")
     %script(type="text/javascript" src="js/bootstrap-dropdown.js")
     %script(type="text/javascript" src="js/bootstrap-scrollspy.js")
+    %script(type="text/javascript" src="js/bootstrap-modal.js")
   %body
   
     .topbar
@@ -32,22 +33,67 @@
             %li
               %a(href="/about.html") 
                 About
-                  
+    
+              
+    
+    #create_profile_modal.modal.hide.fade(style="display: none;")
+      .modal-header
+        %a.close#close-model(href="#")
+          x
+        %h3
+          Save a Profile
+      .modal-body
+        %form
+          %fieldset
+            .clearfix
+              %label(for="name")
+                Name
+              .input
+                %input#profile_name(name="name" size="100" type="text")
+                %span.help-block
+                  Something like "My Company" or "Personal Account"
+              %label(for="access_key")
+                AWS Access Key ID
+              .input
+                %input#profile_aws_access_key(name="access_key" size="100" type="text")
+                %span.help-block
+                  AWS Access Key ID
+              %label(for="secret_key")
+                AWS Secret Access Key
+              .input
+                %input#profile_aws_secret_key(name="secret_key" size="100" type="password")
+                %span.help-block
+                  AWS Secret Access Key
+      .modal-footer
+        %a#save_profile.btn.primary(href="#")
+          Save
+        %a#cancel_profile.btn.secondary(href="#")
+          Cancel          
+      
     .container 
       .row
-        .span4
+        .span12#message_box(style="display:none;")
+    
+      .row
+        .span6
           %h2
-            Domains
-          %table
+            Profiles
+          %a.btn.primary.pull-right#create_profile(href="#" data-controls-modal="create_profile_modal" data-backdrop="static")
+            Create a new profile
+          %table.bordered-table.zebra-striped.condensed-table#profiles_table
             %thead
               %tr
                 %th
-                  Domain
+                  Name
+                %th
+                  Edit
+                %th
+                  In Use
+                
             %tbody
               %tr
-                %td
-                  No Domains...  
-                  %a(href="#create") Create one?
+                %td(colspan="3")
+                  No profiles...
                 
       
         .span8.offset2   

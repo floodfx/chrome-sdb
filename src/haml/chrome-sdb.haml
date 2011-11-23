@@ -42,30 +42,32 @@
               Making Simple DB simpler...
 
       .row
-        .span12.offset4#message_box(style="display:none;")
+        .span12#message_box(style="display:none;")
           
 
       .row
-        .span-one-third
+        
+        .span12
+          .clearfix
+            %h3(for="query")
+              Query
+            %input.btn.primary.pull-right(type="button" value="Run Query" onclick="alert('click')")      
+            .input
+              %textarea.xxlarge{:name => "query", :rows => 3}
+              %span.help-block
+                Check out the docs...
+                
+        .span4
           %h2
             Query Tool
           %p
-            Enter a query in the textbox on the right.  
-        
-        .span-two-thirds
-          %input.btn.primary.pull-right(type="button" value="Run Query" onclick="alert('click')")      
-          %h3(for="query")
-            Query
-          .input
-            %textarea.xxlarge{:name => "query", :rows => 3}
-            %span.help-block
-              Check out the docs...
+            Enter a query expression and click 'Run Query'.  The results will be displayed below.
         
       .row
-        .span-two-thrids.offset-one-third
+        .span12
           %h3
             Query Results
-          %table.condensed-table#results_table
+          %table.bordered-table.zebra-striped.condensed-table#query_results_table
             %thead
               %tr
                 %td
@@ -83,16 +85,23 @@
             Domains
             %small
               Creation, Deletion and Metadata
-          %table
+              
+      .row
+        .span-one-third
+          %a.btn.primary#create_domain(href="#") 
+            Create Domain
+          %table.bordered-table.zebra-striped.condensed-table#domains_table
             %thead
               %tr
                 %th
                   Domain
+                %th
+                  Metadata
             %tbody
               %tr
-                %td
+                %td(rowspan="2")
                   No Domains...  
-                  %a(href="#create") Create one?
+                  
     
     .container
       .fill
