@@ -51,9 +51,9 @@
           .clearfix
             %h3(for="query")
               Query
-            %input.btn.primary.pull-right(type="button" value="Run Query" onclick="alert('click')")      
+            %input.btn.primary.pull-right(type="button" value="Run Query" onclick="query()")      
             .input
-              %textarea.xxlarge{:name => "query", :rows => 3}
+              %textarea.xxlarge#query_expr{:name => "query", :rows => 3}
               %span.help-block
                 Check out the docs...
                 

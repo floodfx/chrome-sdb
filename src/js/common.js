@@ -370,11 +370,12 @@ SimpleDB = (function() {
       params["NextToken"] = next_token;
     }
     return this.ajax_request(this.build_request_url("Select", params), function(result, data) {
-      var items;
+      var attr_name, attr_name2, attr_names, items;
       if ((result.error != null)) {
         callback(result);
       }
       items = [];
+      attr_names = {};
       $("Item", data).each(function(i) {
         var item;
         item = {
@@ -384,6 +385,7 @@ SimpleDB = (function() {
         $("Attribute", $(this)).each(function(j) {
           var name, val;
           name = $("Name", $(this)).text();
+          attr_names[name] = name;
           val = $("Value", $(this)).text();
           if (!item["attrs"][name]) {
             item["attrs"][name] = [];
@@ -393,6 +395,15 @@ SimpleDB = (function() {
         return items.push(item);
       });
       result.items = items;
+      result.attr_names = (function() {
+        var _results;
+        _results = [];
+        for (attr_name in attr_names) {
+          attr_name2 = attr_names[attr_name];
+          _results.push(attr_name);
+        }
+        return _results;
+      })();
       result.next_token = $("NextToken", data).text();
       return callback(result);
     });

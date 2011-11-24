@@ -103,10 +103,12 @@ class SimpleDB
       if(result.error?)  
         callback(result)
       items = []
+      attr_names = {}
       $("Item", data).each((i)->
         item = {attrs:{},name:$("Name:first", $(this)).text()}
-        $("Attribute", $(this)).each((j)->
+        $("Attribute", $(this)).each((j)->        
           name = $("Name", $(this)).text()
+          attr_names[name] = name
           val  = $("Value", $(this)).text()
           item["attrs"][name] = [] unless item["attrs"][name]
           item["attrs"][name].push(val)
@@ -114,6 +116,8 @@ class SimpleDB
         items.push(item)
       )
       result.items = items
+      result.attr_names = for attr_name,attr_name2 of attr_names
+        attr_name
       result.next_token = $("NextToken", data).text()
       callback(result)
     )

@@ -544,11 +544,12 @@ SimpleDB = (function() {
       params["NextToken"] = next_token;
     }
     return this.ajax_request(this.build_request_url("Select", params), function(result, data) {
-      var items;
+      var attr_name, attr_name2, attr_names, items;
       if ((result.error != null)) {
         callback(result);
       }
       items = [];
+      attr_names = {};
       $("Item", data).each(function(i) {
         var item;
         item = {
@@ -558,6 +559,7 @@ SimpleDB = (function() {
         $("Attribute", $(this)).each(function(j) {
           var name, val;
           name = $("Name", $(this)).text();
+          attr_names[name] = name;
           val = $("Value", $(this)).text();
           if (!item["attrs"][name]) {
             item["attrs"][name] = [];
@@ -567,6 +569,15 @@ SimpleDB = (function() {
         return items.push(item);
       });
       result.items = items;
+      result.attr_names = (function() {
+        var _results;
+        _results = [];
+        for (attr_name in attr_names) {
+          attr_name2 = attr_names[attr_name];
+          _results.push(attr_name);
+        }
+        return _results;
+      })();
       result.next_token = $("NextToken", data).text();
       return callback(result);
     });
@@ -866,7 +877,7 @@ Profile = (function() {
     return Storage.set("chrome-sdb.profiles", Profile.profiles_json(new_profiles), true);
   };
   return Profile;
-})();var handle_domains, profile, sdb;
+})();var handle_domains, handle_query, profile, query, sdb;
 profile = Profile.primary();
 if (!profile) {
   chrome.tabs.create({
@@ -892,3 +903,53 @@ sdb.list_domains(function(res) {
     return $("#domains_table > tbody").html(trs.join(""));
   });
 });
+handle_query = function(results) {
+  var attr_name, attr_vals, item, item_count, tds, ths, trs;
+  console.log(results);
+  item_count = results.items.length;
+  if (item_count === 0) {
+    return $("#query_results_table > tbody").html("No results...");
+  } else {
+    ths = (function() {
+      var _i, _len, _ref, _results;
+      _ref = results.attr_names;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        attr_name = _ref[_i];
+        _results.push("<th>" + attr_name + "</th>");
+      }
+      return _results;
+    })();
+    trs = (function() {
+      var _i, _len, _ref, _results;
+      _ref = results.items;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        item = _ref[_i];
+        console.log(item.name);
+        tds = (function() {
+          var _j, _len2, _ref2, _results2;
+          _ref2 = results.attr_names;
+          _results2 = [];
+          for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+            attr_name = _ref2[_j];
+            attr_vals = item.attrs[attr_name];
+            console.log(attr_vals);
+            _results2.push(attr_vals != null ? attr_vals.length > 1 ? "<td><table><tbody><tr><td>" + attr_vals.join("</td><td>") + "</td></tr></tbody></table></td>" : "<td>" + (attr_vals.join('')) + "</td>" : "<td></td>");
+          }
+          return _results2;
+        })();
+        _results.push("<tr><td>" + item.name + "</td>" + (tds.join("")) + "</tr>");
+      }
+      return _results;
+    })();
+    $("#query_results_table > thead").html("<tr><th>Item Name</th>" + (ths.join('')) + "</tr>");
+    return $("#query_results_table > tbody").html(trs.join(""));
+  }
+};
+query = function() {
+  var query_expr;
+  query_expr = $("#query_expr").val();
+  console.log(query_expr);
+  return sdb.select(query_expr, handle_query);
+};
