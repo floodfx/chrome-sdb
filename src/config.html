@@ -55,6 +55,7 @@
       </div>
       <div class='modal-body'>
         <form>
+          <input id='create_profile_action' name='action_type' type='hidden' value='create' />
           <fieldset>
             <div class='clearfix'>
               <label for='name'>
@@ -63,7 +64,7 @@
               <div class='input'>
                 <input id='profile_name' name='name' size='100' type='text' />
                 <span class='help-block'>
-                  Something like "My Company" or "Personal Account"
+                  Something like "My Company Creds" or "Personal Account"
                 </span>
               </div>
               <label for='access_key'>
@@ -89,10 +90,10 @@
         </form>
       </div>
       <div class='modal-footer'>
-        <a class='btn primary' href='#' id='save_profile'>
+        <a class='btn primary' href='#' id='save_profile' onclick='save_profile()'>
           Save
         </a>
-        <a class='btn secondary' href='#' id='cancel_profile'>
+        <a class='btn secondary' href='#' id='cancel_profile' onclick='cancel_profile()'>
           Cancel
         </a>
       </div>
@@ -102,13 +103,10 @@
         <div class='span12' id='message_box' style='display:none;'></div>
       </div>
       <div class='row'>
-        <div class='span6'>
+        <div class='span8'>
           <h2>
             Profiles
           </h2>
-          <a class='btn primary pull-right' data-backdrop='static' data-controls-modal='create_profile_modal' href='#' id='create_profile'>
-            Create a new profile
-          </a>
           <table class='bordered-table zebra-striped condensed-table' id='profiles_table'>
             <thead>
               <tr>
@@ -116,39 +114,30 @@
                   Name
                 </th>
                 <th>
+                  Access Key ID
+                </th>
+                <th>
                   Edit
                 </th>
                 <th>
-                  In Use
+                  Use
+                </th>
+                <th>
+                  Delete
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td colspan='3'>
+                <td colspan='5'>
                   No profiles...
                 </td>
               </tr>
             </tbody>
           </table>
-        </div>
-        <div class='span8 offset2'>
-          <form class='form-stacked'>
-            <fieldset>
-              <div class='clearfix'>
-                <label class='large' for='query'>
-                  Query
-                </label>
-                <div class='input'>
-                  <textarea class='xxlarge' name='query'></textarea>
-                  <span class='help-block'>
-                    Check out the docs...
-                  </span>
-                </div>
-              </div>
-              <input class='btn primary pull-right' onclick="alert('click')" type='button' value='Run Query' />
-            </fieldset>
-          </form>
+          <a class='btn primary pull-right' data-backdrop='static' data-controls-modal='create_profile_modal' href='#' id='create_profile'>
+            Create a new profile
+          </a>
         </div>
       </div>
     </div>

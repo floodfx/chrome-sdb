@@ -23,13 +23,18 @@ class Profile
     
   save:(make_primary=false)->
     # lookup profiles first then save
-    # profiles json: {name1:settings1,...}
-    profiles = Profile.find_all()    
-    profiles[@name] = @settings.to_json()
-    Storage.set("chrome-sdb.profiles", profiles, true)
+    # profiles json: {name1:settings1,...}    
+    profiles = Profile.find_all()
+    found = false
+    for profile in profiles
+      if @name == profile.get_name()
+        profile.use_settings(@settings)
+        found = true
+    profiles.push(this) if !found
+    Storage.set("chrome-sdb.profiles", Profile.profiles_json(profiles), true)
     # set primary if none set
-    primary_name = Profile.primary()
-    this.make_primary() if primary_name == null || make_primary
+    primary = Profile.primary()    
+    this.make_primary() if primary == null || make_primary
     this
   
   delete:()->
@@ -54,19 +59,34 @@ class Profile
   
   @find_all:()->
     # profiles json: {name1:settings1,...}
-    Storage.get("chrome-sdb.profiles", true) ? {}
+    profiles_json = Storage.get("chrome-sdb.profiles", true) ? {}
+    profiles = for name, settings of profiles_json
+      new Profile(name, Settings.from_json(settings))
     
   @find:(by_name)->
     profiles = Profile.find_all()
-    for name, settings of profiles
-      if by_name == name
-        return new Profile(name, Settings.from_json(settings))
+    for profile in profiles
+      if profile.get_name() == by_name
+        return profile
     null
+    
+  @profiles_json:(profiles)->
+    profiles_json = {}
+    for profile in profiles
+      profiles_json[profile.get_name()] = profile.get_settings().to_json()
+    profiles_json
+    
+  @delete_all:()->
+    Storage.set("chrome-sdb.profiles", {}, true)
     
   @delete:(name)->
     profiles = Profile.find_all()
-    delete profiles[name]
-    Storage.set("chrome-sdb.profiles", profiles, true)
+    new_profiles = []
+    for i in [0...profiles.length]
+      if profiles[i].get_name() != name
+        new_profiles.push(profiles[i])
+    Storage.set("chrome-sdb.profiles", Profile.profiles_json(new_profiles), true)
+
     
     
     

@@ -773,15 +773,25 @@ Profile = (function() {
     return this;
   };
   Profile.prototype.save = function(make_primary) {
-    var primary_name, profiles;
+    var found, primary, profile, profiles, _i, _len;
     if (make_primary == null) {
       make_primary = false;
     }
     profiles = Profile.find_all();
-    profiles[this.name] = this.settings.to_json();
-    Storage.set("chrome-sdb.profiles", profiles, true);
-    primary_name = Profile.primary();
-    if (primary_name === null || make_primary) {
+    found = false;
+    for (_i = 0, _len = profiles.length; _i < _len; _i++) {
+      profile = profiles[_i];
+      if (this.name === profile.get_name()) {
+        profile.use_settings(this.settings);
+        found = true;
+      }
+    }
+    if (!found) {
+      profiles.push(this);
+    }
+    Storage.set("chrome-sdb.profiles", Profile.profiles_json(profiles), true);
+    primary = Profile.primary();
+    if (primary === null || make_primary) {
       this.make_primary();
     }
     return this;
@@ -809,25 +819,51 @@ Profile = (function() {
     }
   };
   Profile.find_all = function() {
-    var _ref;
-    return (_ref = Storage.get("chrome-sdb.profiles", true)) != null ? _ref : {};
+    var name, profiles, profiles_json, settings, _ref;
+    profiles_json = (_ref = Storage.get("chrome-sdb.profiles", true)) != null ? _ref : {};
+    return profiles = (function() {
+      var _results;
+      _results = [];
+      for (name in profiles_json) {
+        settings = profiles_json[name];
+        _results.push(new Profile(name, Settings.from_json(settings)));
+      }
+      return _results;
+    })();
   };
   Profile.find = function(by_name) {
-    var name, profiles, settings;
+    var profile, profiles, _i, _len;
     profiles = Profile.find_all();
-    for (name in profiles) {
-      settings = profiles[name];
-      if (by_name === name) {
-        return new Profile(name, Settings.from_json(settings));
+    for (_i = 0, _len = profiles.length; _i < _len; _i++) {
+      profile = profiles[_i];
+      if (profile.get_name() === by_name) {
+        return profile;
       }
     }
     return null;
   };
+  Profile.profiles_json = function(profiles) {
+    var profile, profiles_json, _i, _len;
+    profiles_json = {};
+    for (_i = 0, _len = profiles.length; _i < _len; _i++) {
+      profile = profiles[_i];
+      profiles_json[profile.get_name()] = profile.get_settings().to_json();
+    }
+    return profiles_json;
+  };
+  Profile.delete_all = function() {
+    return Storage.set("chrome-sdb.profiles", {}, true);
+  };
   Profile["delete"] = function(name) {
-    var profiles;
+    var i, new_profiles, profiles, _ref;
     profiles = Profile.find_all();
-    delete profiles[name];
-    return Storage.set("chrome-sdb.profiles", profiles, true);
+    new_profiles = [];
+    for (i = 0, _ref = profiles.length; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
+      if (profiles[i].get_name() !== name) {
+        new_profiles.push(profiles[i]);
+      }
+    }
+    return Storage.set("chrome-sdb.profiles", Profile.profiles_json(new_profiles), true);
   };
   return Profile;
 })();var handle_domains, profile, sdb;
@@ -852,7 +888,6 @@ sdb.list_domains(function(res) {
     }
     return _results;
   })();
-  console.log(trs);
   return $(function() {
     return $("#domains_table > tbody").html(trs.join(""));
   });

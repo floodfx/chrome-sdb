@@ -104,15 +104,25 @@ Profile = (function() {
     return this;
   };
   Profile.prototype.save = function(make_primary) {
-    var primary_name, profiles;
+    var found, primary, profile, profiles, _i, _len;
     if (make_primary == null) {
       make_primary = false;
     }
     profiles = Profile.find_all();
-    profiles[this.name] = this.settings.to_json();
-    Storage.set("chrome-sdb.profiles", profiles, true);
-    primary_name = Profile.primary();
-    if (primary_name === null || make_primary) {
+    found = false;
+    for (_i = 0, _len = profiles.length; _i < _len; _i++) {
+      profile = profiles[_i];
+      if (this.name === profile.get_name()) {
+        profile.use_settings(this.settings);
+        found = true;
+      }
+    }
+    if (!found) {
+      profiles.push(this);
+    }
+    Storage.set("chrome-sdb.profiles", Profile.profiles_json(profiles), true);
+    primary = Profile.primary();
+    if (primary === null || make_primary) {
       this.make_primary();
     }
     return this;
@@ -140,31 +150,57 @@ Profile = (function() {
     }
   };
   Profile.find_all = function() {
-    var _ref;
-    return (_ref = Storage.get("chrome-sdb.profiles", true)) != null ? _ref : {};
+    var name, profiles, profiles_json, settings, _ref;
+    profiles_json = (_ref = Storage.get("chrome-sdb.profiles", true)) != null ? _ref : {};
+    return profiles = (function() {
+      var _results;
+      _results = [];
+      for (name in profiles_json) {
+        settings = profiles_json[name];
+        _results.push(new Profile(name, Settings.from_json(settings)));
+      }
+      return _results;
+    })();
   };
   Profile.find = function(by_name) {
-    var name, profiles, settings;
+    var profile, profiles, _i, _len;
     profiles = Profile.find_all();
-    for (name in profiles) {
-      settings = profiles[name];
-      if (by_name === name) {
-        return new Profile(name, Settings.from_json(settings));
+    for (_i = 0, _len = profiles.length; _i < _len; _i++) {
+      profile = profiles[_i];
+      if (profile.get_name() === by_name) {
+        return profile;
       }
     }
     return null;
   };
+  Profile.profiles_json = function(profiles) {
+    var profile, profiles_json, _i, _len;
+    profiles_json = {};
+    for (_i = 0, _len = profiles.length; _i < _len; _i++) {
+      profile = profiles[_i];
+      profiles_json[profile.get_name()] = profile.get_settings().to_json();
+    }
+    return profiles_json;
+  };
+  Profile.delete_all = function() {
+    return Storage.set("chrome-sdb.profiles", {}, true);
+  };
   Profile["delete"] = function(name) {
-    var profiles;
+    var i, new_profiles, profiles, _ref;
     profiles = Profile.find_all();
-    delete profiles[name];
-    return Storage.set("chrome-sdb.profiles", profiles, true);
+    new_profiles = [];
+    for (i = 0, _ref = profiles.length; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
+      if (profiles[i].get_name() !== name) {
+        new_profiles.push(profiles[i]);
+      }
+    }
+    return Storage.set("chrome-sdb.profiles", Profile.profiles_json(new_profiles), true);
   };
   return Profile;
-})();var message, primary, profiles;
+})();var cancel_profile, delete_profile, edit_profile, message, primary, profiles, save_profile, update_profiles_table, use_profile;
 primary = Profile.primary();
 profiles = Profile.find_all();
-if (primary === null && profiles === {}) {
+if (Profile.find_all() === []) {
   message = '<div class="alert-message warning">\n  <a id="close_message_box" class="close" href="#">×</a>\n  <p><strong>Create a profile</strong> Enter your AWS Credentials to begin.</p>\n</div>';
   $(function() {
     $("#message_box").append(message).show();
@@ -174,30 +210,58 @@ if (primary === null && profiles === {}) {
   });
 } else {
   $(function() {
-    var name, settings, trs, use;
-    trs = (function() {
-      var _results;
-      _results = [];
-      for (name in profiles) {
-        settings = profiles[name];
-        use = name === primary.get_name() ? "In use" : "<a id=\"use_profile_" + name + "\" class=\"btn\" href=\"#\">Use</a>";
-        _results.push("<tr><td>" + name + "</td><td><a id=\"profile_" + name + "\" href=\"#edit_profile\">Edit</a></td><td>" + use + "</td></tr>");
-      }
-      return _results;
-    })();
-    return $("#profiles_table > tbody").html(trs.join(""));
+    return update_profiles_table();
   });
 }
-$(function() {
-  $("#save_profile").click(function() {
-    var access_key, name, secret_key;
-    name = $("#profile_name").val();
-    access_key = $("#profile_aws_access_key").val();
-    secret_key = $("#profile_aws_secret_key").val();
-    new Profile(name, new Settings(access_key, secret_key)).save();
-    return $('#create_profile_modal').modal('hide');
-  });
-  return $("#cancel_profile").click(function() {
-    return $('#create_profile_modal').modal('hide');
-  });
-});
+update_profiles_table = function() {
+  var access_key, del, edit, name, primary_name, profile, trs, use;
+  primary = Profile.primary();
+  profiles = Profile.find_all();
+  trs = (function() {
+    var _i, _len, _ref, _results;
+    _results = [];
+    for (_i = 0, _len = profiles.length; _i < _len; _i++) {
+      profile = profiles[_i];
+      name = profile.get_name();
+      primary_name = (_ref = primary != null ? primary.get_name() : void 0) != null ? _ref : null;
+      access_key = profile.get_settings().get_access_key();
+      use = profile.get_name() === primary_name ? "In use" : "<a class=\"btn\" href=\"#\" onclick=\"use_profile('" + name + "')\">Use</a>";
+      edit = "<a href=\"#\" onclick=\"edit_profile('" + name + "')\">Edit</a>";
+      del = "<a href=\"#\" onclick=\"delete_profile('" + name + "')\">Delete</a>";
+      _results.push("<tr><td>" + name + "</td><td>" + access_key + "</td><td>" + edit + "</td><td>" + use + "</td><td>" + del + "</td></tr>");
+    }
+    return _results;
+  })();
+  return $("#profiles_table > tbody").html(trs.join(""));
+};
+save_profile = function() {
+  var access_key, name, secret_key;
+  name = $("#profile_name").val();
+  access_key = $("#profile_aws_access_key").val();
+  secret_key = $("#profile_aws_secret_key").val();
+  new Profile(name, new Settings(access_key, secret_key)).save();
+  $('#create_profile_modal').modal('hide');
+  return update_profiles_table();
+};
+cancel_profile = function() {
+  console.log('cancel');
+  return $('#create_profile_modal').modal('hide');
+};
+edit_profile = function(profile_name) {
+  var profile;
+  profile = Profile.find(profile_name);
+  $("#profile_name").val(profile.get_name());
+  $("#profile_aws_access_key").val(profile.get_settings().get_access_key());
+  $("#profile_aws_secret_key").val(profile.get_settings().get_secret_key());
+  return $('#create_profile_modal').modal('show');
+};
+delete_profile = function(profile_name) {
+  Profile["delete"](profile_name);
+  return update_profiles_table();
+};
+use_profile = function(profile_name) {
+  var profile;
+  profile = Profile.find(profile_name);
+  profile.make_primary();
+  return update_profiles_table();
+};

@@ -44,6 +44,7 @@
           Save a Profile
       .modal-body
         %form
+          %input#create_profile_action(type="hidden" name="action_type" value="create")
           %fieldset
             .clearfix
               %label(for="name")
@@ -51,7 +52,7 @@
               .input
                 %input#profile_name(name="name" size="100" type="text")
                 %span.help-block
-                  Something like "My Company" or "Personal Account"
+                  Something like "My Company Creds" or "Personal Account"
               %label(for="access_key")
                 AWS Access Key ID
               .input
@@ -65,9 +66,9 @@
                 %span.help-block
                   AWS Secret Access Key
       .modal-footer
-        %a#save_profile.btn.primary(href="#")
+        %a#save_profile.btn.primary(href="#" onclick="save_profile()")
           Save
-        %a#cancel_profile.btn.secondary(href="#")
+        %a#cancel_profile.btn.secondary(href="#" onclick="cancel_profile()")
           Cancel          
       
     .container 
@@ -75,39 +76,31 @@
         .span12#message_box(style="display:none;")
     
       .row
-        .span6
+        .span8
           %h2
-            Profiles
-          %a.btn.primary.pull-right#create_profile(href="#" data-controls-modal="create_profile_modal" data-backdrop="static")
-            Create a new profile
+            Profiles          
           %table.bordered-table.zebra-striped.condensed-table#profiles_table
             %thead
               %tr
                 %th
                   Name
                 %th
+                  Access Key ID
+                %th
                   Edit
                 %th
-                  In Use
+                  Use
+                %th
+                  Delete
                 
             %tbody
               %tr
-                %td(colspan="3")
+                %td(colspan="5")
                   No profiles...
-                
+                  
+          %a.btn.primary.pull-right#create_profile(href="#" data-controls-modal="create_profile_modal" data-backdrop="static")
+            Create a new profile      
       
-        .span8.offset2   
-          %form.form-stacked
-            %fieldset
-              .clearfix
-                %label.large(for="query")
-                  Query
-                .input
-                  %textarea.xxlarge{:name => "query"}
-                  %span.help-block
-                    Check out the docs...
-              %input.btn.primary.pull-right(type="button" value="Run Query" onclick="alert('click')")      
-        
       
     
     .container
