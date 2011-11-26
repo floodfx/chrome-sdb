@@ -16,27 +16,35 @@ else
     update_domains_table()
   )
 
-update_domains_table = ()->
+update_domains_table = (callback=null)->
   sdb.list_domains((res)-> 
     domains = res["domains"]
     trs = for domain in domains
       controls = "<button id=\"metadata_#{domain}\" class=\"btn info\" onclick=\"metadata('#{domain}')\">metadata</a>"
-      controls += " <button id=\"delete_#{domain}\" class=\"btn secondary\" onclick=\"confirm_delete('#{domain}')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>"
+      controls += " <button id=\"delete_#{domain}\" class=\"btn\" onclick=\"confirm_delete('#{domain}')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>"
       "<tr><td>#{domain}<br />#{controls}</td></tr>"    
     $("#domains_table > tbody").html(trs.join(""))    
+    
+    callback() if callback?
+    # hide delete modal if necessary
+    disable_delete()
+    $('#confirm_delete_domain_modal').modal('hide')
   )
+
+
+enable_delete = ()->
+  $("button[id^=delete_]").removeAttr("disabled").addClass("danger").removeClass("secondary")
+  $("#domain_deletion_control").text("Disable Delete").addClass("danger").removeClass("secondary").addClass("active")
   
+disable_delete = ()->
+  $("button[id^=delete_]").attr("disabled", "disabled").addClass("secondary").removeClass("danger")
+  $("#domain_deletion_control").text("Enable Delete").addClass("secondary").removeClass("danger").removeClass("active")
 
 handle_delete_toggle = ()->
-  $("#domain_deletion_control").attr("disabled", "disabled")
-  elements = $("button[id^=delete_]")
   if($("#domain_deletion_control").hasClass("active"))
-    elements.attr("disabled", "disabled").addClass("secondary").removeClass("danger")
-    $("#domain_deletion_control").text("Enable Delete").addClass("secondary").removeClass("danger")
+    disable_delete()
   else
-    elements.removeAttr("disabled").addClass("danger").removeClass("secondary")
-    $("#domain_deletion_control").text("Disable Delete").addClass("danger").removeClass("secondary")
-  $("#domain_deletion_control").removeAttr("disabled")
+    enable_delete()
 
 handle_query = (results)->
   console.log(results)
@@ -89,14 +97,41 @@ metadata = (domain)->
     $("input[name=attributeValuesSizeBytes]").val(res.attribute_values_size_bytes)
     $('#domain_metadata_modal').modal('show')
   )
-  
+
+# watch for confirm deletion and enable delete button
+$(()->
+  $("input[name=confirm_delete]").keydown((key)->
+    # DELET + E
+    if($("input[name=confirm_delete]").val() == "DELET" && key.keyCode == 69)
+      $("#confirm_delete_domain_btn").removeAttr("disabled").addClass("danger").removeClass("secondary")
+    else
+      $("#confirm_delete_domain_btn").attr("disabled", "disabled").addClass("secondary").removeClass("danger")
+  )
+)
+
+confirm_delete = (domain)->
+  $("#domain_delete_label").html("<h2>Delete #{domain}?</h2>")
+  $("input[name=confirm_delete]").val("")
+  $("#confirm_delete_domain_btn").attr("onclick", "delete_domain('#{domain}')")
+  $("#confirm_delete_domain_modal").modal('show')
+
+delete_domain = (domain)->
+  $("#confirm_delete_domain_btn").button('loading')
+  sdb.delete_domain(domain, (results)->
+    update_domains_table(()->
+      $("#confirm_delete_domain_btn").button('reset')
+      disable_delete()
+    )    
+  )  
   
 # handle modal buttons
 save_domain = ()->
   #TODO validate
   domain = $("#domain_name").val()
-  sdb.create_domain(domain, update_domains_table)
-  $('#create_domain_modal').modal('hide')
-
-cancel_domain = ()->
-  $('#create_domain_modal').modal('hide')
+  $("#save_domain").button('loading')
+  sdb.create_domain(domain, ()->
+    update_domains_table(()->
+      $("#save_domain").button('reset')
+      $('#create_domain_modal').modal('hide')
+    )    
+  )

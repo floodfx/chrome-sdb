@@ -126,7 +126,7 @@
             <a class='btn primary' data-backdrop='static' data-controls-modal='create_domain_modal' href='#' id='create_domain'>
               Create Domain
             </a>
-            <button class='btn warning' data-toggle='toggle' id='domain_deletion_control' onclick='handle_delete_toggle()'>
+            <button class='btn warning' id='domain_deletion_control' onclick='handle_delete_toggle()'>
               Enable Delete
             </button>
           </div>
@@ -157,12 +157,49 @@
         </form>
       </div>
       <div class='modal-footer'>
-        <a class='btn primary' href='#' id='save_domain' onclick='save_domain()'>
+        <button class='btn primary' data-loading-text='Saving domain...' id='save_domain' onclick='save_domain()'>
           Save
-        </a>
-        <a class='btn secondary' href='#' id='cancel_domain' onclick='cancel_domain()'>
+        </button>
+        <button class='btn secondary' onclick="$('#create_domain_modal').modal('hide')">
           Cancel
+        </button>
+      </div>
+    </div>
+    <div class='modal hide fade' id='confirm_delete_domain_modal' style='display: none;'>
+      <div class='modal-header'>
+        <a class='close' href='#' id='close-model'>
+          x
         </a>
+        <div id='domain_delete_label'>
+          <h2>
+            Delete
+          </h2>
+        </div>
+      </div>
+      <div class='modal-body'>
+        <h2>
+          Really delete this domain?! Prove it:
+        </h2>
+        <form>
+          <fieldset>
+            <div class='clearfix'>
+              <label for='confirmDelete'>
+                Enter DELETE here
+              </label>
+              <div class='input'>
+                <input class='span2' name='confirm_delete' type='text' />
+              </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class='modal-footer'>
+        <button class='btn warning' data-loading-text='Deleting...' disabled='disabled' id='confirm_delete_domain_btn'>
+          Confirm Deletion
+        </button>
+        <button class='btn secondary' onclick="$('#confirm_delete_domain_modal').modal('hide')">
+          Cancel
+        </button>
       </div>
     </div>
     <div class='modal hide fade' id='domain_metadata_modal' style='display: none;'>

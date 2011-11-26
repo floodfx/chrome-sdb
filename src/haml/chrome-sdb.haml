@@ -92,7 +92,7 @@
           .row
             %a.btn.primary#create_domain(href="#" data-controls-modal="create_domain_modal" data-backdrop="static") 
               Create Domain  
-            %button.btn.warning#domain_deletion_control(data-toggle="toggle" onclick="handle_delete_toggle()") 
+            %button.btn.warning#domain_deletion_control(onclick="handle_delete_toggle()") 
               Enable Delete                    
     
    
@@ -113,11 +113,34 @@
               .input
                 %input#domain_name(name="name" size="100" type="text")
       .modal-footer
-        %a#save_domain.btn.primary(href="#" onclick="save_domain()")
+        %button#save_domain.btn.primary(onclick="save_domain()" data-loading-text="Saving domain...")
           Save
-        %a#cancel_domain.btn.secondary(href="#" onclick="cancel_domain()")
+        %button.btn.secondary(onclick="$('#create_domain_modal').modal('hide')")
           Cancel
     
+    #confirm_delete_domain_modal.modal.hide.fade(style="display: none;")
+      .modal-header
+        %a.close#close-model(href="#")
+          x
+        #domain_delete_label
+          %h2
+            Delete
+      .modal-body
+        %h2
+          Really delete this domain?! Prove it:
+        %form
+          %fieldset
+            .clearfix
+              %label(for="confirmDelete")
+                Enter DELETE here
+              .input
+                %input.span2(name="confirm_delete" type="text") 
+          
+      .modal-footer
+        %button#confirm_delete_domain_btn.btn.warning(disabled="disabled" data-loading-text="Deleting...")
+          Confirm Deletion
+        %button.btn.secondary(onclick="$('#confirm_delete_domain_modal').modal('hide')")
+          Cancel
     
     #domain_metadata_modal.modal.hide.fade(style="display: none;")
       .modal-header

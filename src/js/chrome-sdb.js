@@ -880,7 +880,7 @@ Profile = (function() {
     return Storage.set("chrome-sdb.profiles", Profile.profiles_json(new_profiles), true);
   };
   return Profile;
-})();var cancel_domain, handle_delete_toggle, handle_query, metadata, profile, query, save_domain, sdb, update_domains_table;
+})();var confirm_delete, delete_domain, disable_delete, enable_delete, handle_delete_toggle, handle_query, metadata, profile, query, save_domain, sdb, update_domains_table;
 profile = Profile.primary();
 if (!profile) {
   chrome.tabs.create({
@@ -892,7 +892,10 @@ if (!profile) {
     return update_domains_table();
   });
 }
-update_domains_table = function() {
+update_domains_table = function(callback) {
+  if (callback == null) {
+    callback = null;
+  }
   return sdb.list_domains(function(res) {
     var controls, domain, domains, trs;
     domains = res["domains"];
@@ -902,26 +905,33 @@ update_domains_table = function() {
       for (_i = 0, _len = domains.length; _i < _len; _i++) {
         domain = domains[_i];
         controls = "<button id=\"metadata_" + domain + "\" class=\"btn info\" onclick=\"metadata('" + domain + "')\">metadata</a>";
-        controls += " <button id=\"delete_" + domain + "\" class=\"btn secondary\" onclick=\"confirm_delete('" + domain + "')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>";
+        controls += " <button id=\"delete_" + domain + "\" class=\"btn\" onclick=\"confirm_delete('" + domain + "')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>";
         _results.push("<tr><td>" + domain + "<br />" + controls + "</td></tr>");
       }
       return _results;
     })();
-    return $("#domains_table > tbody").html(trs.join(""));
+    $("#domains_table > tbody").html(trs.join(""));
+    if (callback != null) {
+      callback();
+    }
+    disable_delete();
+    return $('#confirm_delete_domain_modal').modal('hide');
   });
 };
+enable_delete = function() {
+  $("button[id^=delete_]").removeAttr("disabled").addClass("danger").removeClass("secondary");
+  return $("#domain_deletion_control").text("Disable Delete").addClass("danger").removeClass("secondary").addClass("active");
+};
+disable_delete = function() {
+  $("button[id^=delete_]").attr("disabled", "disabled").addClass("secondary").removeClass("danger");
+  return $("#domain_deletion_control").text("Enable Delete").addClass("secondary").removeClass("danger").removeClass("active");
+};
 handle_delete_toggle = function() {
-  var elements;
-  $("#domain_deletion_control").attr("disabled", "disabled");
-  elements = $("button[id^=delete_]");
   if ($("#domain_deletion_control").hasClass("active")) {
-    elements.attr("disabled", "disabled").addClass("secondary").removeClass("danger");
-    $("#domain_deletion_control").text("Enable Delete").addClass("secondary").removeClass("danger");
+    return disable_delete();
   } else {
-    elements.removeAttr("disabled").addClass("danger").removeClass("secondary");
-    $("#domain_deletion_control").text("Disable Delete").addClass("danger").removeClass("secondary");
+    return enable_delete();
   }
-  return $("#domain_deletion_control").removeAttr("disabled");
 };
 handle_query = function(results) {
   var attr_name, attr_vals, item, item_count, next_token, tds, ths, trs;
@@ -996,12 +1006,38 @@ metadata = function(domain) {
     return $('#domain_metadata_modal').modal('show');
   });
 };
+$(function() {
+  return $("input[name=confirm_delete]").keydown(function(key) {
+    if ($("input[name=confirm_delete]").val() === "DELET" && key.keyCode === 69) {
+      return $("#confirm_delete_domain_btn").removeAttr("disabled").addClass("danger").removeClass("secondary");
+    } else {
+      return $("#confirm_delete_domain_btn").attr("disabled", "disabled").addClass("secondary").removeClass("danger");
+    }
+  });
+});
+confirm_delete = function(domain) {
+  $("#domain_delete_label").html("<h2>Delete " + domain + "?</h2>");
+  $("input[name=confirm_delete]").val("");
+  $("#confirm_delete_domain_btn").attr("onclick", "delete_domain('" + domain + "')");
+  return $("#confirm_delete_domain_modal").modal('show');
+};
+delete_domain = function(domain) {
+  $("#confirm_delete_domain_btn").button('loading');
+  return sdb.delete_domain(domain, function(results) {
+    return update_domains_table(function() {
+      $("#confirm_delete_domain_btn").button('reset');
+      return disable_delete();
+    });
+  });
+};
 save_domain = function() {
   var domain;
   domain = $("#domain_name").val();
-  sdb.create_domain(domain, update_domains_table);
-  return $('#create_domain_modal').modal('hide');
-};
-cancel_domain = function() {
-  return $('#create_domain_modal').modal('hide');
+  $("#save_domain").button('loading');
+  return sdb.create_domain(domain, function() {
+    return update_domains_table(function() {
+      $("#save_domain").button('reset');
+      return $('#create_domain_modal').modal('hide');
+    });
+  });
 };
