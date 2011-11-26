@@ -228,10 +228,12 @@ var __indexOf = Array.prototype.indexOf || function(item) {
   return -1;
 };
 SimpleDB = (function() {
-  function SimpleDB(profile, endpoint) {
+  function SimpleDB(profile, secure) {
     this.profile = profile;
-    this.endpoint = endpoint != null ? endpoint : "sdb.amazonaws.com";
-    this.sdb_base_url = "http://" + this.endpoint + "?";
+    this.secure = secure != null ? secure : false;
+    this.protocol = this.secure ? "https" : "http";
+    this.endpoint = this.profile.get_settings().get_region();
+    this.sdb_base_url = "" + this.protocol + "://" + this.endpoint + "?";
   }
   SimpleDB.prototype.set_profile = function(profile) {
     return this.profile = profile;
@@ -257,6 +259,29 @@ SimpleDB = (function() {
       return _results;
     })();
     return this.sdb_base_url + encoded_params.join("&");
+  };
+  SimpleDB.regions = function() {
+    return [
+      {
+        name: "US East (Northern Virginia) Region",
+        endpoint: "sdb.amazonaws.com"
+      }, {
+        name: "US West (Oregon) Region",
+        endpoint: "sdb.us-west-2.amazonaws.com"
+      }, {
+        name: "US West (Northern California) Region",
+        endpoint: "sdb.us-west-1.amazonaws.com"
+      }, {
+        name: "EU (Ireland) Region",
+        endpoint: "sdb.eu-west-1.amazonaws.com"
+      }, {
+        name: "Asia Pacific (Singapore) Region",
+        endpoint: "sdb.ap-southeast-1.amazonaws.com"
+      }, {
+        name: "Asia Pacific (Tokyo) Region",
+        endpoint: "sdb.ap-northeast-1.amazonaws.com"
+      }
+    ];
   };
   SimpleDB.parse_metadata = function(data, text_status, req_url) {
     return {
@@ -934,11 +959,12 @@ AwsUtils = (function() {
   return pub;
 })();var Settings;
 Settings = (function() {
-  function Settings(access_key, secret_key, region, version) {
+  function Settings(access_key, secret_key, region, version, https_protocol) {
     this.access_key = access_key;
     this.secret_key = secret_key;
-    this.region = region != null ? region : "us-east-1";
+    this.region = region != null ? region : "sdb.amazonaws.com";
     this.version = version != null ? version : "2009-04-15";
+    this.https_protocol = https_protocol != null ? https_protocol : false;
   }
   Settings.prototype.use_access_key = function(access_key) {
     this.access_key = access_key;
@@ -956,6 +982,10 @@ Settings = (function() {
     this.version = version;
     return this;
   };
+  Settings.prototype.use_https_protocol = function(true_or_false) {
+    this.https_protocol = true_or_false;
+    return this;
+  };
   Settings.prototype.get_access_key = function() {
     return this.access_key;
   };
@@ -968,17 +998,21 @@ Settings = (function() {
   Settings.prototype.get_version = function() {
     return this.version;
   };
+  Settings.prototype.get_use_https = function() {
+    return this.https_protocol;
+  };
   Settings.prototype.to_json = function() {
     return {
       access_key: this.access_key,
       secret_key: this.secret_key,
       region: this.region,
-      version: this.version
+      version: this.version,
+      https_protocol: this.https_protocol
     };
   };
   Settings.from_json = function(json) {
     if (json) {
-      return new Settings(json["access_key"], json["secret_key"], json["region"], json["version"]);
+      return new Settings(json["access_key"], json["secret_key"], json["region"], json["version"], json["https_protocol"]);
     } else {
       return null;
     }

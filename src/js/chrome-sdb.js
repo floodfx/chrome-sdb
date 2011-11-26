@@ -286,11 +286,12 @@ Storage = (function() {
   return pub;
 })();var Settings;
 Settings = (function() {
-  function Settings(access_key, secret_key, region, version) {
+  function Settings(access_key, secret_key, region, version, https_protocol) {
     this.access_key = access_key;
     this.secret_key = secret_key;
-    this.region = region != null ? region : "us-east-1";
+    this.region = region != null ? region : "sdb.amazonaws.com";
     this.version = version != null ? version : "2009-04-15";
+    this.https_protocol = https_protocol != null ? https_protocol : false;
   }
   Settings.prototype.use_access_key = function(access_key) {
     this.access_key = access_key;
@@ -308,6 +309,10 @@ Settings = (function() {
     this.version = version;
     return this;
   };
+  Settings.prototype.use_https_protocol = function(true_or_false) {
+    this.https_protocol = true_or_false;
+    return this;
+  };
   Settings.prototype.get_access_key = function() {
     return this.access_key;
   };
@@ -320,17 +325,21 @@ Settings = (function() {
   Settings.prototype.get_version = function() {
     return this.version;
   };
+  Settings.prototype.get_use_https = function() {
+    return this.https_protocol;
+  };
   Settings.prototype.to_json = function() {
     return {
       access_key: this.access_key,
       secret_key: this.secret_key,
       region: this.region,
-      version: this.version
+      version: this.version,
+      https_protocol: this.https_protocol
     };
   };
   Settings.from_json = function(json) {
     if (json) {
-      return new Settings(json["access_key"], json["secret_key"], json["region"], json["version"]);
+      return new Settings(json["access_key"], json["secret_key"], json["region"], json["version"], json["https_protocol"]);
     } else {
       return null;
     }
@@ -402,10 +411,12 @@ var __indexOf = Array.prototype.indexOf || function(item) {
   return -1;
 };
 SimpleDB = (function() {
-  function SimpleDB(profile, endpoint) {
+  function SimpleDB(profile, secure) {
     this.profile = profile;
-    this.endpoint = endpoint != null ? endpoint : "sdb.amazonaws.com";
-    this.sdb_base_url = "http://" + this.endpoint + "?";
+    this.secure = secure != null ? secure : false;
+    this.protocol = this.secure ? "https" : "http";
+    this.endpoint = this.profile.get_settings().get_region();
+    this.sdb_base_url = "" + this.protocol + "://" + this.endpoint + "?";
   }
   SimpleDB.prototype.set_profile = function(profile) {
     return this.profile = profile;
@@ -431,6 +442,29 @@ SimpleDB = (function() {
       return _results;
     })();
     return this.sdb_base_url + encoded_params.join("&");
+  };
+  SimpleDB.regions = function() {
+    return [
+      {
+        name: "US East (Northern Virginia) Region",
+        endpoint: "sdb.amazonaws.com"
+      }, {
+        name: "US West (Oregon) Region",
+        endpoint: "sdb.us-west-2.amazonaws.com"
+      }, {
+        name: "US West (Northern California) Region",
+        endpoint: "sdb.us-west-1.amazonaws.com"
+      }, {
+        name: "EU (Ireland) Region",
+        endpoint: "sdb.eu-west-1.amazonaws.com"
+      }, {
+        name: "Asia Pacific (Singapore) Region",
+        endpoint: "sdb.ap-southeast-1.amazonaws.com"
+      }, {
+        name: "Asia Pacific (Tokyo) Region",
+        endpoint: "sdb.ap-northeast-1.amazonaws.com"
+      }
+    ];
   };
   SimpleDB.parse_metadata = function(data, text_status, req_url) {
     return {
@@ -880,7 +914,7 @@ Profile = (function() {
     return Storage.set("chrome-sdb.profiles", Profile.profiles_json(new_profiles), true);
   };
   return Profile;
-})();var confirm_delete, delete_domain, disable_delete, enable_delete, handle_delete_toggle, handle_query, metadata, profile, query, save_domain, sdb, update_domains_table;
+})();var confirm_delete, delete_domain, disable_delete, enable_delete, handle_delete_toggle, handle_query, metadata, profile, query, save_domain, sdb, update_domains_table, update_region;
 profile = Profile.primary();
 if (!profile) {
   chrome.tabs.create({
@@ -892,6 +926,27 @@ if (!profile) {
     return update_domains_table();
   });
 }
+update_region = function(region) {
+  profile.get_settings().use_region(region);
+  profile.save();
+  sdb = new SimpleDB(profile);
+  return update_domains_table();
+};
+$(function() {
+  var region, _i, _len, _ref;
+  _ref = SimpleDB.regions();
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    region = _ref[_i];
+    $("#region_select").append($('<option>', {
+      value: region["endpoint"]
+    }).text(region["name"]));
+  }
+  $("#region_select").val(profile.get_settings().get_region());
+  return $("#region_select").change(function() {
+    region = $("#region_select").val();
+    return update_region(region);
+  });
+});
 update_domains_table = function(callback) {
   if (callback == null) {
     callback = null;
@@ -899,23 +954,25 @@ update_domains_table = function(callback) {
   return sdb.list_domains(function(res) {
     var controls, domain, domains, trs;
     domains = res["domains"];
-    trs = (function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = domains.length; _i < _len; _i++) {
-        domain = domains[_i];
-        controls = "<button id=\"metadata_" + domain + "\" class=\"btn info\" onclick=\"metadata('" + domain + "')\">metadata</a>";
-        controls += " <button id=\"delete_" + domain + "\" class=\"btn\" onclick=\"confirm_delete('" + domain + "')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>";
-        _results.push("<tr><td>" + domain + "<br />" + controls + "</td></tr>");
-      }
-      return _results;
-    })();
+    if (domains.length === 0) {
+      trs = ["<tr><td>No domains in this region</td></tr>"];
+    } else {
+      trs = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = domains.length; _i < _len; _i++) {
+          domain = domains[_i];
+          controls = "<button id=\"metadata_" + domain + "\" class=\"btn info\" onclick=\"metadata('" + domain + "')\">metadata</a>";
+          controls += " <button id=\"delete_" + domain + "\" class=\"btn\" onclick=\"confirm_delete('" + domain + "')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>";
+          _results.push("<tr><td>" + domain + "<br />" + controls + "</td></tr>");
+        }
+        return _results;
+      })();
+    }
     $("#domains_table > tbody").html(trs.join(""));
     if (callback != null) {
-      callback();
+      return callback();
     }
-    disable_delete();
-    return $('#confirm_delete_domain_modal').modal('hide');
   });
 };
 enable_delete = function() {

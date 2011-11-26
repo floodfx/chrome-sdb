@@ -82,7 +82,8 @@
         .span4
           .row
             %h3
-              Domains                       
+              Domains
+            %select#region_select(name="region")                                                      
             .overflow(style="height:250px; overflow:auto;margin-bottom:10px")
               %table.bordered-table.zebra-striped.condensed-table#domains_table                    
                 %tbody

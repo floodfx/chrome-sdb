@@ -1,10 +1,11 @@
 var Settings;
 Settings = (function() {
-  function Settings(access_key, secret_key, region, version) {
+  function Settings(access_key, secret_key, region, version, https_protocol) {
     this.access_key = access_key;
     this.secret_key = secret_key;
-    this.region = region != null ? region : "us-east-1";
+    this.region = region != null ? region : "sdb.amazonaws.com";
     this.version = version != null ? version : "2009-04-15";
+    this.https_protocol = https_protocol != null ? https_protocol : false;
   }
   Settings.prototype.use_access_key = function(access_key) {
     this.access_key = access_key;
@@ -22,6 +23,10 @@ Settings = (function() {
     this.version = version;
     return this;
   };
+  Settings.prototype.use_https_protocol = function(true_or_false) {
+    this.https_protocol = true_or_false;
+    return this;
+  };
   Settings.prototype.get_access_key = function() {
     return this.access_key;
   };
@@ -34,17 +39,21 @@ Settings = (function() {
   Settings.prototype.get_version = function() {
     return this.version;
   };
+  Settings.prototype.get_use_https = function() {
+    return this.https_protocol;
+  };
   Settings.prototype.to_json = function() {
     return {
       access_key: this.access_key,
       secret_key: this.secret_key,
       region: this.region,
-      version: this.version
+      version: this.version,
+      https_protocol: this.https_protocol
     };
   };
   Settings.from_json = function(json) {
     if (json) {
-      return new Settings(json["access_key"], json["secret_key"], json["region"], json["version"]);
+      return new Settings(json["access_key"], json["secret_key"], json["region"], json["version"], json["https_protocol"]);
     } else {
       return null;
     }

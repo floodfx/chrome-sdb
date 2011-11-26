@@ -15,20 +15,37 @@ else
   $(()->
     update_domains_table()
   )
+  
+update_region = (region)->
+  profile.get_settings().use_region(region)
+  profile.save()
+  sdb = new SimpleDB(profile)
+  update_domains_table()
+ 
+# set region options 
+$(()->
+  for region in SimpleDB.regions()
+    $("#region_select").append($('<option>', { value:region["endpoint"] }).text(region["name"]))
+  $("#region_select").val(profile.get_settings().get_region())
+  $("#region_select").change(()->
+    region = $("#region_select").val()    
+    update_region(region)
+  )
+)
 
 update_domains_table = (callback=null)->
   sdb.list_domains((res)-> 
     domains = res["domains"]
-    trs = for domain in domains
-      controls = "<button id=\"metadata_#{domain}\" class=\"btn info\" onclick=\"metadata('#{domain}')\">metadata</a>"
-      controls += " <button id=\"delete_#{domain}\" class=\"btn\" onclick=\"confirm_delete('#{domain}')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>"
-      "<tr><td>#{domain}<br />#{controls}</td></tr>"    
+    if domains.length == 0
+      trs = ["<tr><td>No domains in this region</td></tr>"]
+    else
+      trs = for domain in domains
+        controls = "<button id=\"metadata_#{domain}\" class=\"btn info\" onclick=\"metadata('#{domain}')\">metadata</a>"
+        controls += " <button id=\"delete_#{domain}\" class=\"btn\" onclick=\"confirm_delete('#{domain}')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>"
+        "<tr><td>#{domain}<br />#{controls}</td></tr>"    
     $("#domains_table > tbody").html(trs.join(""))    
     
     callback() if callback?
-    # hide delete modal if necessary
-    disable_delete()
-    $('#confirm_delete_domain_modal').modal('hide')
   )
 
 

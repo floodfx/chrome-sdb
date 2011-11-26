@@ -2,8 +2,10 @@
 
 class SimpleDB
 
-  constructor:(@profile, @endpoint="sdb.amazonaws.com")->
-    @sdb_base_url = "http://#{@endpoint}?"
+  constructor:(@profile, @secure=false)->
+    @protocol = if(@secure) then "https" else "http"
+    @endpoint = @profile.get_settings().get_region()
+    @sdb_base_url = "#{@protocol}://#{@endpoint}?"
     
   set_profile:(profile)->
     @profile=profile
@@ -22,6 +24,16 @@ class SimpleDB
     encoded_params = for k,v of params
       k + "=" + encodeURIComponent(v)
     @sdb_base_url + encoded_params.join("&")
+    
+  @regions:()->
+    [
+      {name:"US East (Northern Virginia) Region", endpoint:"sdb.amazonaws.com"},
+      {name:"US West (Oregon) Region", endpoint:"sdb.us-west-2.amazonaws.com"},      
+      {name:"US West (Northern California) Region", endpoint:"sdb.us-west-1.amazonaws.com"},
+      {name:"EU (Ireland) Region", endpoint:"sdb.eu-west-1.amazonaws.com"},
+      {name:"Asia Pacific (Singapore) Region", endpoint:"sdb.ap-southeast-1.amazonaws.com"},
+      {name:"Asia Pacific (Tokyo) Region", endpoint:"sdb.ap-northeast-1.amazonaws.com"}
+    ]
     
   @parse_metadata: (data, text_status, req_url)->
     {
