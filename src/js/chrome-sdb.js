@@ -578,7 +578,10 @@ SimpleDB = (function() {
         }
         return _results;
       })();
-      result.next_token = $("NextToken", data).text();
+      next_token = $("NextToken", data).text();
+      if (next_token !== "") {
+        result.next_token = next_token;
+      }
       return callback(result);
     });
   };
@@ -877,38 +880,63 @@ Profile = (function() {
     return Storage.set("chrome-sdb.profiles", Profile.profiles_json(new_profiles), true);
   };
   return Profile;
-})();var handle_domains, handle_query, profile, query, sdb;
+})();var cancel_domain, handle_delete_toggle, handle_query, metadata, profile, query, save_domain, sdb, update_domains_table;
 profile = Profile.primary();
 if (!profile) {
   chrome.tabs.create({
     url: 'config.html'
   });
+} else {
+  sdb = new SimpleDB(profile);
+  $(function() {
+    return update_domains_table();
+  });
 }
-handle_domains = function(res) {};
-sdb = new SimpleDB(profile);
-sdb.list_domains(function(res) {
-  var domain, domains, metadata, trs;
-  domains = res["domains"];
-  trs = (function() {
-    var _i, _len, _results;
-    _results = [];
-    for (_i = 0, _len = domains.length; _i < _len; _i++) {
-      domain = domains[_i];
-      metadata = "<a id=\"metadata_" + domain + "\" class=\"btn\" href=\"#\">Metadata</a>";
-      _results.push("<tr><td>" + domain + "</td><td>" + metadata + "</td></tr>");
-    }
-    return _results;
-  })();
-  return $(function() {
+update_domains_table = function() {
+  return sdb.list_domains(function(res) {
+    var controls, domain, domains, trs;
+    domains = res["domains"];
+    trs = (function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = domains.length; _i < _len; _i++) {
+        domain = domains[_i];
+        controls = "<button id=\"metadata_" + domain + "\" class=\"btn info\" onclick=\"metadata('" + domain + "')\">metadata</a>";
+        controls += " <button id=\"delete_" + domain + "\" class=\"btn secondary\" onclick=\"confirm_delete('" + domain + "')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>";
+        _results.push("<tr><td>" + domain + "<br />" + controls + "</td></tr>");
+      }
+      return _results;
+    })();
     return $("#domains_table > tbody").html(trs.join(""));
   });
-});
+};
+handle_delete_toggle = function() {
+  var elements;
+  $("#domain_deletion_control").attr("disabled", "disabled");
+  elements = $("button[id^=delete_]");
+  if ($("#domain_deletion_control").hasClass("active")) {
+    elements.attr("disabled", "disabled").addClass("secondary").removeClass("danger");
+    $("#domain_deletion_control").text("Enable Delete").addClass("secondary").removeClass("danger");
+  } else {
+    elements.removeAttr("disabled").addClass("danger").removeClass("secondary");
+    $("#domain_deletion_control").text("Disable Delete").addClass("danger").removeClass("secondary");
+  }
+  return $("#domain_deletion_control").removeAttr("disabled");
+};
 handle_query = function(results) {
-  var attr_name, attr_vals, item, item_count, tds, ths, trs;
+  var attr_name, attr_vals, item, item_count, next_token, tds, ths, trs;
   console.log(results);
   item_count = results.items.length;
+  next_token = results.next_token;
+  if (next_token != null) {
+    next_token = next_token.replace(/\n/g, "");
+    $("#next_page_btn").removeAttr("disabled").attr("onclick", "query('" + next_token + "')");
+  } else {
+    $("#next_page_btn").attr("disabled", "disabled").removeAttr("onclick");
+  }
   if (item_count === 0) {
-    return $("#query_results_table > tbody").html("No results...");
+    $("#query_results_table > thead").html("<tr><th>Items</th></tr>");
+    return $("#query_results_table > tbody").html("<tr><td>No results...</td></tr>");
   } else {
     ths = (function() {
       var _i, _len, _ref, _results;
@@ -926,7 +954,6 @@ handle_query = function(results) {
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         item = _ref[_i];
-        console.log(item.name);
         tds = (function() {
           var _j, _len2, _ref2, _results2;
           _ref2 = results.attr_names;
@@ -934,7 +961,6 @@ handle_query = function(results) {
           for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
             attr_name = _ref2[_j];
             attr_vals = item.attrs[attr_name];
-            console.log(attr_vals);
             _results2.push(attr_vals != null ? attr_vals.length > 1 ? "<td><table><tbody><tr><td>" + attr_vals.join("</td><td>") + "</td></tr></tbody></table></td>" : "<td>" + (attr_vals.join('')) + "</td>" : "<td></td>");
           }
           return _results2;
@@ -944,12 +970,38 @@ handle_query = function(results) {
       return _results;
     })();
     $("#query_results_table > thead").html("<tr><th>Item Name</th>" + (ths.join('')) + "</tr>");
-    return $("#query_results_table > tbody").html(trs.join(""));
+    $("#query_results_table > tbody").html(trs.join(""));
+    return $("#query_btn").button('reset');
   }
 };
-query = function() {
+query = function(next_token) {
   var query_expr;
+  if (next_token == null) {
+    next_token = null;
+  }
   query_expr = $("#query_expr").val();
-  console.log(query_expr);
-  return sdb.select(query_expr, handle_query);
+  sdb.select(query_expr, handle_query, next_token);
+  return $("#query_btn").button('loading');
+};
+metadata = function(domain) {
+  return sdb.domain_metadata(domain, function(res) {
+    console.log("metadata", res);
+    $("#domain_metadata_label").html("<h2>" + domain + " <small>Metadata</small></h2>");
+    $("input[name=itemCount]").val(res.item_count);
+    $("input[name=itemNamesSizeBytes]").val(res.item_names_size_bytes);
+    $("input[name=attributeNameCount]").val(res.attribute_name_count);
+    $("input[name=attributeNamesSizeBytes]").val(res.attribute_names_size_bytes);
+    $("input[name=attributeValueCount]").val(res.attribute_value_count);
+    $("input[name=attributeValuesSizeBytes]").val(res.attribute_values_size_bytes);
+    return $('#domain_metadata_modal').modal('show');
+  });
+};
+save_domain = function() {
+  var domain;
+  domain = $("#domain_name").val();
+  sdb.create_domain(domain, update_domains_table);
+  return $('#create_domain_modal').modal('hide');
+};
+cancel_domain = function() {
+  return $('#create_domain_modal').modal('hide');
 };

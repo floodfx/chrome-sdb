@@ -404,7 +404,10 @@ SimpleDB = (function() {
         }
         return _results;
       })();
-      result.next_token = $("NextToken", data).text();
+      next_token = $("NextToken", data).text();
+      if (next_token !== "") {
+        result.next_token = next_token;
+      }
       return callback(result);
     });
   };

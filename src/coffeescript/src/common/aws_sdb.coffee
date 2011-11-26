@@ -118,7 +118,8 @@ class SimpleDB
       result.items = items
       result.attr_names = for attr_name,attr_name2 of attr_names
         attr_name
-      result.next_token = $("NextToken", data).text()
+      next_token = $("NextToken", data).text()
+      result.next_token = next_token if(next_token != "")
       callback(result)
     )
     

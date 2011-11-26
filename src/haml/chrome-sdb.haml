@@ -15,12 +15,14 @@
     %script(type="text/javascript" src="js/bootstrap-popover.js")
     %script(type="text/javascript" src="js/bootstrap-dropdown.js")
     %script(type="text/javascript" src="js/bootstrap-scrollspy.js")
+    %script(type="text/javascript" src="js/bootstrap-buttons.js") 
+    %script(type="text/javascript" src="js/bootstrap-modal.js")
   %body
   
     .topbar
       .fill
-        .container
-          %a.brand(href="/chrome-sdb.html")
+        .container-fluid
+          %a.brand.brandfont(href="/chrome-sdb.html")
             Simple DB Tool
           %ul.nav
             %li.active
@@ -33,80 +35,130 @@
               %a(href="/about.html") 
                 About
                   
-    .container 
-      .row     
-        .span16.page-header
-          %h1
-            Simple DB Tool
-            %small
-              Making Simple DB simpler...
-
-      .row
-        .span12#message_box(style="display:none;")
-          
-
-      .row
-        
-        .span12
-          .clearfix
-            %h3(for="query")
-              Query
-            %input.btn.primary.pull-right(type="button" value="Run Query" onclick="query()")      
-            .input
-              %textarea.xxlarge#query_expr{:name => "query", :rows => 3}
-              %span.help-block
-                Check out the docs...
-                
-        .span4
-          %h2
-            Query Tool
-          %p
-            Enter a query expression and click 'Run Query'.  The results will be displayed below.
-        
-      .row
-        .span12
-          %h3
-            Query Results
-          %table.bordered-table.zebra-striped.condensed-table#query_results_table
-            %thead
-              %tr
-                %td
-                  Items
-            %tbody
-              %tr
-                %td
-                  No query run...
-      
-      
-      
-      .row(style="padding-top:50px")        
-        .span16.page-header
-          %h2
-            Domains
-            %small
-              Creation, Deletion and Metadata
-              
-      .row
-        .span-one-third
-          %a.btn.primary#create_domain(href="#") 
-            Create Domain
-          %table.bordered-table.zebra-striped.condensed-table#domains_table
-            %thead
-              %tr
-                %th
-                  Domain
-                %th
-                  Metadata
-            %tbody
-              %tr
-                %td(rowspan="2")
-                  No Domains...  
-                  
-    
-    .container
-      .fill
+    .container-fluid
+      .content
         .row
-          .span16
+          .span12.offset1#message_box(style="display:none;")             
+    
+    .container-fluid
+      
+      .content
+
+        .row
+        
+          .span12.offset1
+            .clearfix
+              %h3(for="query")
+                Query               
+              .input
+                %textarea.xxlarge#query_expr{:name => "query", :rows => 3}
+                %span.help-block
+                  Check out the docs...
+              %input.btn.primary#query_btn(type="button" value="Run Query" onclick="query()" data-loading-text="Running query...")                             
+
+        .row
+          .span15.offset1
+            %h3(style="padding-top:20px")
+              Query Results
+            %button.btn.info#next_page_btn(disabled="disabled")
+              Next page &raquo;
+            %table.bordered-table.zebra-striped.condensed-table#query_results_table
+              %thead
+                %tr
+                  %td
+                    Items
+              %tbody
+                %tr
+                  %td
+                    No query run...
+                    
+        .row
+          .span15.offset1
             %footer.actions
               If you find this tool useful, consider purchasing it.
+
+                  
+      .sidebar(style="padding-left:10px")
+        .span4
+          .row
+            %h3
+              Domains                       
+            .overflow(style="height:250px; overflow:auto;margin-bottom:10px")
+              %table.bordered-table.zebra-striped.condensed-table#domains_table                    
+                %tbody
+                  %tr
+                    %td(rowspan="2")
+                      No Domains...
+          .row
+            %a.btn.primary#create_domain(href="#" data-controls-modal="create_domain_modal" data-backdrop="static") 
+              Create Domain  
+            %button.btn.warning#domain_deletion_control(data-toggle="toggle" onclick="handle_delete_toggle()") 
+              Enable Delete                    
     
+   
+        
+
+    #create_domain_modal.modal.hide.fade(style="display: none;")
+      .modal-header
+        %a.close#close-model(href="#")
+          x
+        %h3
+          Create a domain
+      .modal-body
+        %form
+          %fieldset
+            .clearfix
+              %label(for="name")
+                Name
+              .input
+                %input#domain_name(name="name" size="100" type="text")
+      .modal-footer
+        %a#save_domain.btn.primary(href="#" onclick="save_domain()")
+          Save
+        %a#cancel_domain.btn.secondary(href="#" onclick="cancel_domain()")
+          Cancel
+    
+    
+    #domain_metadata_modal.modal.hide.fade(style="display: none;")
+      .modal-header
+        %a.close#close-model(href="#")
+          x
+        #domain_metadata_label
+          %h3
+            Metadata
+      .modal-body
+        %form
+          %fieldset
+            .clearfix
+              %label(for="itemCount")
+                Item Count
+              .input
+                %input.span2(name="itemCount" type="text" disabled="disabled")
+            .clearfix
+              %label(for="itemNamesSizeBytes")
+                Item Names Size (Bytes)
+              .input
+                %input.span2(name="itemNamesSizeBytes" type="text" disabled="disabled")
+            .clearfix
+              %label(for="attributeNameCount")
+                Attribute Name Count
+              .input
+                %input.span2(name="attributeNameCount" type="text" disabled="disabled")
+            .clearfix
+              %label(for="attributeNamesSizeBytes")
+                Attribute Names Size (Bytes)
+              .input
+                %input.span2(name="attributeNamesSizeBytes" type="text" disabled="disabled")
+            .clearfix
+              %label(for="attributeValueCount")
+                Attribute Value Count
+              .input
+                %input.span2(name="attributeValueCount" type="text" disabled="disabled")
+            .clearfix
+              %label(for="attributeValuesSizeBytes")
+                Attribute Values Size (Bytes)
+              .input
+                %input.span2(name="attributeValuesSizeBytes" type="text" disabled="disabled")
+      .modal-footer
+        %a.btn.primary(href="#" onclick="$('#domain_metadata_modal').modal('hide')")
+          Ok

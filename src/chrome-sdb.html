@@ -15,12 +15,14 @@
     <script src='js/bootstrap-popover.js' type='text/javascript'></script>
     <script src='js/bootstrap-dropdown.js' type='text/javascript'></script>
     <script src='js/bootstrap-scrollspy.js' type='text/javascript'></script>
+    <script src='js/bootstrap-buttons.js' type='text/javascript'></script>
+    <script src='js/bootstrap-modal.js' type='text/javascript'></script>
   </head>
   <body>
     <div class='topbar'>
       <div class='fill'>
-        <div class='container'>
-          <a class='brand' href='/chrome-sdb.html'>
+        <div class='container-fluid'>
+          <a class='brand brandfont' href='/chrome-sdb.html'>
             Simple DB Tool
           </a>
           <ul class='nav'>
@@ -43,113 +45,195 @@
         </div>
       </div>
     </div>
-    <div class='container'>
-      <div class='row'>
-        <div class='span16 page-header'>
-          <h1>
-            Simple DB Tool
-            <small>
-              Making Simple DB simpler...
-            </small>
-          </h1>
-        </div>
-      </div>
-      <div class='row'>
-        <div class='span12' id='message_box' style='display:none;'></div>
-      </div>
-      <div class='row'>
-        <div class='span12'>
-          <div class='clearfix'>
-            <h3 for='query'>
-              Query
-            </h3>
-            <input class='btn primary pull-right' onclick='query()' type='button' value='Run Query' />
-            <div class='input'>
-              <textarea class='xxlarge' id='query_expr' name='query' rows='3'></textarea>
-              <span class='help-block'>
-                Check out the docs...
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class='span4'>
-          <h2>
-            Query Tool
-          </h2>
-          <p>
-            Enter a query expression and click 'Run Query'.  The results will be displayed below.
-          </p>
-        </div>
-      </div>
-      <div class='row'>
-        <div class='span12'>
-          <h3>
-            Query Results
-          </h3>
-          <table class='bordered-table zebra-striped condensed-table' id='query_results_table'>
-            <thead>
-              <tr>
-                <td>
-                  Items
-                </td>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  No query run...
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class='row' style='padding-top:50px'>
-        <div class='span16 page-header'>
-          <h2>
-            Domains
-            <small>
-              Creation, Deletion and Metadata
-            </small>
-          </h2>
-        </div>
-      </div>
-      <div class='row'>
-        <div class='span-one-third'>
-          <a class='btn primary' href='#' id='create_domain'>
-            Create Domain
-          </a>
-          <table class='bordered-table zebra-striped condensed-table' id='domains_table'>
-            <thead>
-              <tr>
-                <th>
-                  Domain
-                </th>
-                <th>
-                  Metadata
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td rowspan='2'>
-                  No Domains...
-                </td>
-              </tr>
-            </tbody>
-          </table>
+    <div class='container-fluid'>
+      <div class='content'>
+        <div class='row'>
+          <div class='span12 offset1' id='message_box' style='display:none;'></div>
         </div>
       </div>
     </div>
-    <div class='container'>
-      <div class='fill'>
+    <div class='container-fluid'>
+      <div class='content'>
         <div class='row'>
-          <div class='span16'>
+          <div class='span12 offset1'>
+            <div class='clearfix'>
+              <h3 for='query'>
+                Query
+              </h3>
+              <div class='input'>
+                <textarea class='xxlarge' id='query_expr' name='query' rows='3'></textarea>
+                <span class='help-block'>
+                  Check out the docs...
+                </span>
+              </div>
+              <input class='btn primary' data-loading-text='Running query...' id='query_btn' onclick='query()' type='button' value='Run Query' />
+            </div>
+          </div>
+        </div>
+        <div class='row'>
+          <div class='span15 offset1'>
+            <h3 style='padding-top:20px'>
+              Query Results
+            </h3>
+            <button class='btn info' disabled='disabled' id='next_page_btn'>
+              Next page &raquo;
+            </button>
+            <table class='bordered-table zebra-striped condensed-table' id='query_results_table'>
+              <thead>
+                <tr>
+                  <td>
+                    Items
+                  </td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    No query run...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class='row'>
+          <div class='span15 offset1'>
             <footer class='actions'>
               If you find this tool useful, consider purchasing it.
             </footer>
           </div>
         </div>
+      </div>
+      <div class='sidebar' style='padding-left:10px'>
+        <div class='span4'>
+          <div class='row'>
+            <h3>
+              Domains
+            </h3>
+            <div class='overflow' style='height:250px; overflow:auto;margin-bottom:10px'>
+              <table class='bordered-table zebra-striped condensed-table' id='domains_table'>
+                <tbody>
+                  <tr>
+                    <td rowspan='2'>
+                      No Domains...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class='row'>
+            <a class='btn primary' data-backdrop='static' data-controls-modal='create_domain_modal' href='#' id='create_domain'>
+              Create Domain
+            </a>
+            <button class='btn warning' data-toggle='toggle' id='domain_deletion_control' onclick='handle_delete_toggle()'>
+              Enable Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='modal hide fade' id='create_domain_modal' style='display: none;'>
+      <div class='modal-header'>
+        <a class='close' href='#' id='close-model'>
+          x
+        </a>
+        <h3>
+          Create a domain
+        </h3>
+      </div>
+      <div class='modal-body'>
+        <form>
+          <fieldset>
+            <div class='clearfix'>
+              <label for='name'>
+                Name
+              </label>
+              <div class='input'>
+                <input id='domain_name' name='name' size='100' type='text' />
+              </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class='modal-footer'>
+        <a class='btn primary' href='#' id='save_domain' onclick='save_domain()'>
+          Save
+        </a>
+        <a class='btn secondary' href='#' id='cancel_domain' onclick='cancel_domain()'>
+          Cancel
+        </a>
+      </div>
+    </div>
+    <div class='modal hide fade' id='domain_metadata_modal' style='display: none;'>
+      <div class='modal-header'>
+        <a class='close' href='#' id='close-model'>
+          x
+        </a>
+        <div id='domain_metadata_label'>
+          <h3>
+            Metadata
+          </h3>
+        </div>
+      </div>
+      <div class='modal-body'>
+        <form>
+          <fieldset>
+            <div class='clearfix'>
+              <label for='itemCount'>
+                Item Count
+              </label>
+              <div class='input'>
+                <input class='span2' disabled='disabled' name='itemCount' type='text' />
+              </div>
+            </div>
+            <div class='clearfix'>
+              <label for='itemNamesSizeBytes'>
+                Item Names Size (Bytes)
+              </label>
+              <div class='input'>
+                <input class='span2' disabled='disabled' name='itemNamesSizeBytes' type='text' />
+              </div>
+            </div>
+            <div class='clearfix'>
+              <label for='attributeNameCount'>
+                Attribute Name Count
+              </label>
+              <div class='input'>
+                <input class='span2' disabled='disabled' name='attributeNameCount' type='text' />
+              </div>
+            </div>
+            <div class='clearfix'>
+              <label for='attributeNamesSizeBytes'>
+                Attribute Names Size (Bytes)
+              </label>
+              <div class='input'>
+                <input class='span2' disabled='disabled' name='attributeNamesSizeBytes' type='text' />
+              </div>
+            </div>
+            <div class='clearfix'>
+              <label for='attributeValueCount'>
+                Attribute Value Count
+              </label>
+              <div class='input'>
+                <input class='span2' disabled='disabled' name='attributeValueCount' type='text' />
+              </div>
+            </div>
+            <div class='clearfix'>
+              <label for='attributeValuesSizeBytes'>
+                Attribute Values Size (Bytes)
+              </label>
+              <div class='input'>
+                <input class='span2' disabled='disabled' name='attributeValuesSizeBytes' type='text' />
+              </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class='modal-footer'>
+        <a class='btn primary' href='#' onclick="$('#domain_metadata_modal').modal('hide')">
+          Ok
+        </a>
       </div>
     </div>
   </body>
