@@ -51,13 +51,14 @@ update_domains_table = (callback=null)->
     callback() if callback?
   )
   
-add_item = (domain)->
+add_item = ()->
+  $("#domain_select").val(domain_from_query())
   $("#item_name").val("")
   $("#attr_name").val("")
   $("#attr_value_textarea").val("")
   $("#attr_value_is_multivalued").removeAttr("checked")
   $('#add_edit_item_label').text('Add Item')
-  $('#add_edit_item_attributes').modal('show')
+  # $('#add_edit_item_attributes').modal('show')
   
 edit_item = (domain, item, attr_name, attr_values)->
   $("#domain_select").val(domain)
@@ -100,6 +101,10 @@ handle_delete_toggle = ()->
     disable_delete()
   else
     enable_delete()
+    
+domain_from_query = ()->
+  domain_match = $("#query_expr").val().match(/\`(.+)\`/) 
+  if(domain_match != null) then domain_match[1] else null
 
 handle_query = (results)->
   item_count = results.items.length
@@ -151,7 +156,7 @@ handle_query = (results)->
                 )
               else
                 values.push($(this).text())
-              edit_item("Person", item_name, attr_name, values)
+              edit_item(domain_from_query(), item_name, attr_name, values)
             )
           handler_out = ()->
             $("#"+id).remove()

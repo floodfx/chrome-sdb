@@ -914,7 +914,7 @@ Profile = (function() {
     return Storage.set("chrome-sdb.profiles", Profile.profiles_json(new_profiles), true);
   };
   return Profile;
-})();var add_item, confirm_delete, delete_domain, disable_delete, edit_item, enable_delete, handle_delete_toggle, handle_query, metadata, profile, query, save_domain, save_item, sdb, update_domains_table, update_region;
+})();var add_item, confirm_delete, delete_domain, disable_delete, domain_from_query, edit_item, enable_delete, handle_delete_toggle, handle_query, metadata, profile, query, save_domain, save_item, sdb, update_domains_table, update_region;
 profile = Profile.primary();
 if (!profile) {
   chrome.tabs.create({
@@ -981,13 +981,13 @@ update_domains_table = function(callback) {
     }
   });
 };
-add_item = function(domain) {
+add_item = function() {
+  $("#domain_select").val(domain_from_query());
   $("#item_name").val("");
   $("#attr_name").val("");
   $("#attr_value_textarea").val("");
   $("#attr_value_is_multivalued").removeAttr("checked");
-  $('#add_edit_item_label').text('Add Item');
-  return $('#add_edit_item_attributes').modal('show');
+  return $('#add_edit_item_label').text('Add Item');
 };
 edit_item = function(domain, item, attr_name, attr_values) {
   $("#domain_select").val(domain);
@@ -1039,6 +1039,15 @@ handle_delete_toggle = function() {
     return disable_delete();
   } else {
     return enable_delete();
+  }
+};
+domain_from_query = function() {
+  var domain_match;
+  domain_match = $("#query_expr").val().match(/\`(.+)\`/);
+  if (domain_match !== null) {
+    return domain_match[1];
+  } else {
+    return null;
   }
 };
 handle_query = function(results) {
@@ -1108,7 +1117,7 @@ handle_query = function(results) {
               } else {
                 values.push($(this).text());
               }
-              return edit_item("Person", item_name, attr_name, values);
+              return edit_item(domain_from_query(), item_name, attr_name, values);
             });
           };
           handler_out = function() {
