@@ -914,7 +914,7 @@ Profile = (function() {
     return Storage.set("chrome-sdb.profiles", Profile.profiles_json(new_profiles), true);
   };
   return Profile;
-})();var confirm_delete, delete_domain, disable_delete, enable_delete, handle_delete_toggle, handle_query, metadata, profile, query, save_domain, sdb, update_domains_table, update_region;
+})();var add_item, confirm_delete, delete_domain, disable_delete, edit_item, enable_delete, handle_delete_toggle, handle_query, metadata, profile, query, save_domain, save_item, sdb, update_domains_table, update_region;
 profile = Profile.primary();
 if (!profile) {
   chrome.tabs.create({
@@ -952,7 +952,7 @@ update_domains_table = function(callback) {
     callback = null;
   }
   return sdb.list_domains(function(res) {
-    var controls, domain, domains, trs;
+    var controls, domain, domains, trs, _i, _len;
     domains = res["domains"];
     if (domains.length === 0) {
       trs = ["<tr><td>No domains in this region</td></tr>"];
@@ -970,9 +970,60 @@ update_domains_table = function(callback) {
       })();
     }
     $("#domains_table > tbody").html(trs.join(""));
+    for (_i = 0, _len = domains.length; _i < _len; _i++) {
+      domain = domains[_i];
+      $("#domain_select").append($('<option>', {
+        value: domain
+      }).text(domain));
+    }
     if (callback != null) {
       return callback();
     }
+  });
+};
+add_item = function(domain) {
+  $("#item_name").val("");
+  $("#attr_name").val("");
+  $("#attr_value_textarea").val("");
+  $("#attr_value_is_multivalued").removeAttr("checked");
+  $('#add_edit_item_label').text('Add Item');
+  return $('#add_edit_item_attributes').modal('show');
+};
+edit_item = function(domain, item, attr_name, attr_values) {
+  $("#domain_select").val(domain);
+  $("#item_name").val(item);
+  $("#attr_name").val(attr_name);
+  $("#attr_value_textarea").val(attr_values.join("\n")).attr("rows", Math.max(1, attr_values.length));
+  if (attr_values.length > 1) {
+    $("#attr_value_is_multivalued").attr("checked", "checked");
+  } else {
+    $("#attr_value_is_multivalued").removeAttr("checked");
+  }
+  $('#add_edit_item_label').text('Edit Item');
+  return $('#add_edit_item_attributes').modal('show');
+};
+save_item = function() {
+  var attr_multivalued, attr_multivalued_delimiter, attr_name, attr_replace, attr_value, attr_values, domain_name, item_name;
+  domain_name = $("#domain_select").val();
+  item_name = $("#item_name").val();
+  attr_name = $("#attr_name").val();
+  attr_value = $("#attr_value_textarea").val();
+  attr_replace = $("#attr_replace").is(":checked");
+  attr_multivalued = $("#attr_value_is_multivalued").is(":checked");
+  attr_multivalued_delimiter = $("#attr_value_delimiter").val();
+  if (attr_multivalued) {
+    attr_values = attr_value.split(new RegExp(attr_multivalued_delimiter));
+  } else {
+    attr_values = [attr_value];
+  }
+  return sdb.put_attributes(domain_name, item_name, [
+    {
+      name: attr_name,
+      values: attr_values,
+      replace: attr_replace
+    }
+  ], function(res) {
+    return $('#add_edit_item_attributes').modal('hide');
   });
 };
 enable_delete = function() {
@@ -992,7 +1043,6 @@ handle_delete_toggle = function() {
 };
 handle_query = function(results) {
   var attr_name, attr_vals, item, item_count, next_token, tds, ths, trs;
-  console.log(results);
   item_count = results.items.length;
   next_token = results.next_token;
   if (next_token != null) {
@@ -1028,17 +1078,46 @@ handle_query = function(results) {
           for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
             attr_name = _ref2[_j];
             attr_vals = item.attrs[attr_name];
-            _results2.push(attr_vals != null ? attr_vals.length > 1 ? "<td><table><tbody><tr><td>" + attr_vals.join("</td><td>") + "</td></tr></tbody></table></td>" : "<td>" + (attr_vals.join('')) + "</td>" : "<td></td>");
+            _results2.push(attr_vals != null ? attr_vals.length > 1 ? ("<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"true\"><table><tbody><tr><td>") + attr_vals.join("</td><td>") + "</td></tr></tbody></table></td>" : "<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"false\">" + (attr_vals.join('')) + "</td>" : "<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"false\"></td>");
           }
           return _results2;
         })();
-        _results.push("<tr><td>" + item.name + "</td>" + (tds.join("")) + "</tr>");
+        _results.push("<tr data-item-name=\"" + item.name + "\"><td>" + item.name + "</td>" + (tds.join("")) + "</tr>");
       }
       return _results;
     })();
     $("#query_results_table > thead").html("<tr><th>Item Name</th>" + (ths.join('')) + "</tr>");
     $("#query_results_table > tbody").html(trs.join(""));
-    return $("#query_btn").button('reset');
+    $("#query_btn").button('reset');
+    return $("#query_results_table > tbody > tr").each(function(index, val) {
+      return $(val).children("td").each(function(jindex, tdval) {
+        var handler_in, handler_out, id;
+        if (jindex > 0) {
+          id = "edit_image";
+          handler_in = function() {
+            return $(this).append(" <img id=\"" + id + "\" src=\"images/attr_edit.png\"/>").click(function() {
+              var is_multivalued, item_name, values;
+              item_name = $(this).parent().attr("data-item-name");
+              attr_name = $(this).attr("data-attr-name");
+              is_multivalued = $(this).attr("data-attr-multivalued") === "true";
+              values = [];
+              if (is_multivalued) {
+                $(this).children("table").children("tbody").children("tr").children("td").each(function(index, el) {
+                  return values.push($(el).text());
+                });
+              } else {
+                values.push($(this).text());
+              }
+              return edit_item("Person", item_name, attr_name, values);
+            });
+          };
+          handler_out = function() {
+            return $("#" + id).remove();
+          };
+          return $(tdval).hover(handler_in, handler_out);
+        }
+      });
+    });
   }
 };
 query = function(next_token) {
@@ -1052,7 +1131,6 @@ query = function(next_token) {
 };
 metadata = function(domain) {
   return sdb.domain_metadata(domain, function(res) {
-    console.log("metadata", res);
     $("#domain_metadata_label").html("<h2>" + domain + " <small>Metadata</small></h2>");
     $("input[name=itemCount]").val(res.item_count);
     $("input[name=itemNamesSizeBytes]").val(res.item_names_size_bytes);

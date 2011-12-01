@@ -5,3 +5,16 @@ body {
 .brandfont {
   font-family: 'Droid Sans Mono', sans-serif;
 }
+
+form .clearfix2 {
+  margin-bottom: 6px;
+  zoom: 1;
+}
+form .clearfix2:before, form .clearfix2:after {
+  display: table;
+  content: "";
+  zoom: 1;
+}
+form .clearfix2:after {
+  clear: both;
+}

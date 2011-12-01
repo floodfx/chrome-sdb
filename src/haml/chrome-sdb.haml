@@ -40,28 +40,28 @@
         .row
           .span12.offset1#message_box(style="display:none;")             
     
-    .container-fluid
-      
+    .container-fluid      
       .content
-
-        .row
-        
-          .span12.offset1
+      
+        .row        
+          .span8.offset1
             .clearfix
               %h3(for="query")
-                Query               
+                Query    
+                %input.btn.primary.pull-right#query_btn(type="button" value="Run Query" onclick="query()" data-loading-text="Running query...")               
               .input
-                %textarea.xxlarge#query_expr{:name => "query", :rows => 3}
+                %textarea.span8#query_expr{:name => "query", :rows => 3}
                 %span.help-block
                   Check out the docs...
-              %input.btn.primary#query_btn(type="button" value="Run Query" onclick="query()" data-loading-text="Running query...")                             
+                                       
+              
 
         .row
-          .span15.offset1
-            %h3(style="padding-top:20px")
+          .span15.offset1            
+            %h3
               Query Results
-            %button.btn.info#next_page_btn(disabled="disabled")
-              Next page &raquo;
+              %button.btn.info.pull-right#next_page_btn(disabled="disabled")
+                Next page &raquo;
             %table.bordered-table.zebra-striped.condensed-table#query_results_table
               %thead
                 %tr
@@ -79,29 +79,79 @@
 
                   
       .sidebar(style="padding-left:10px")
-        .span4
-          .row
-            %h3
-              Domains
-            %select#region_select(name="region")                                                      
-            .overflow(style="height:250px; overflow:auto;margin-bottom:10px")
-              %table.bordered-table.zebra-striped.condensed-table#domains_table                    
-                %tbody
-                  %tr
-                    %td(rowspan="2")
-                      No Domains...
-          .row
-            %a.btn.primary#create_domain(href="#" data-controls-modal="create_domain_modal" data-backdrop="static") 
-              Create Domain  
-            %button.btn.warning#domain_deletion_control(onclick="handle_delete_toggle()") 
-              Enable Delete                    
-    
+        .row
+          %h3
+            Domains
+            %button.btn.info.pull-right#add_item(data-controls-modal="add_edit_item_attributes" data-backdrop="static" onclick="$('#add_edit_item_label').text('Add Item')")
+              Add Item
+          %select#region_select(name="region")                                                      
+          .overflow(style="height:350px; width: 250px; overflow:auto; margin-bottom:10px;margin-top:10px")
+            %table.bordered-table.zebra-striped.condensed-table#domains_table                    
+              %tbody
+                %tr
+                  %td(rowspan="2")
+                    No Domains...        
+        .row
+          %a.btn.primary#create_domain(href="#" data-controls-modal="create_domain_modal" data-backdrop="static") 
+            Create Domain  
+          %button.btn.warning.pull-right#domain_deletion_control(onclick="handle_delete_toggle()") 
+            Enable Delete                    
+
    
-        
+    #add_edit_item_attributes.modal.hide.fade(style="display:none;")
+      .modal-header
+        %a.close(href="#")
+          x           
+        %h3#add_edit_item_label
+          Add/Edit Item
+      .modal-body
+        %form
+          %fieldset(style="padding-top:0px")
+            .clearfix2
+              %label(for="item_domain_name")
+                Domain
+              .input
+                %select#domain_select(name="item_domain_name")
+            .clearfix2
+              %label(for="item_name")
+                Item Name        
+              .input
+                %input#item_name(name="item_name" type="text")
+            .clearfix2
+              %label(for="attr_name")
+                Attribute Name        
+              .input
+                %input#attr_name(name="attr_name" type="text")
+            .clearfix2
+              %label(for="attr_value")
+                Attribute Value        
+              .input
+                %textarea#attr_value_textarea(name="attr_value_textarea" rows="1" cols="20")
+            .clearfix2
+              %label(for="attr_replace")                    
+              .input
+                %input#attr_replace(type="checkbox" name="attr_replace" value="yes_or_no")
+                %span Replace existing attribute value(s)
+            .clearfix2
+              %label(for="attr_value_is_multivalued")                    
+              .input
+                %input#attr_value_is_multivalued(type="checkbox" name="attr_value_is_multivalued" value="yes_or_no")
+                %span Attribute is multi-valued
+            .clearfix2               
+              .input
+                %label(for="attr_value_delimiter")
+                  Multi-valued Delim (RegExp)
+                %input.span1#attr_value_delimiter(name="attr_value_delimiter" type="text" value="\\n" style="margin-left:10px")
+      .modal-footer
+        %button.btn.info#save_attribute_btn(onclick="save_item()")
+          Save
+        %input.btn#reset_attribute_btn(type="reset")
+        %a(href="#" onclick="$('#add_edit_item_attributes').modal('hide')")
+          Cancel
 
     #create_domain_modal.modal.hide.fade(style="display: none;")
       .modal-header
-        %a.close#close-model(href="#")
+        %a.close(href="#")
           x
         %h3
           Create a domain

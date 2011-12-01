@@ -39,15 +39,53 @@ update_domains_table = (callback=null)->
     if domains.length == 0
       trs = ["<tr><td>No domains in this region</td></tr>"]
     else
-      trs = for domain in domains
+      trs = for domain in domains      
         controls = "<button id=\"metadata_#{domain}\" class=\"btn info\" onclick=\"metadata('#{domain}')\">metadata</a>"
         controls += " <button id=\"delete_#{domain}\" class=\"btn\" onclick=\"confirm_delete('#{domain}')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>"
         "<tr><td>#{domain}<br />#{controls}</td></tr>"    
     $("#domains_table > tbody").html(trs.join(""))    
     
+    for domain in domains
+      $("#domain_select").append($('<option>', {value:domain}).text(domain))
+    
     callback() if callback?
   )
-
+  
+add_item = (domain)->
+  $("#item_name").val("")
+  $("#attr_name").val("")
+  $("#attr_value_textarea").val("")
+  $("#attr_value_is_multivalued").removeAttr("checked")
+  $('#add_edit_item_label').text('Add Item')
+  $('#add_edit_item_attributes').modal('show')
+  
+edit_item = (domain, item, attr_name, attr_values)->
+  $("#domain_select").val(domain)
+  $("#item_name").val(item)
+  $("#attr_name").val(attr_name)
+  $("#attr_value_textarea").val(attr_values.join("\n")).attr("rows", Math.max(1,attr_values.length))
+  if(attr_values.length > 1) 
+    $("#attr_value_is_multivalued").attr("checked", "checked")
+  else
+    $("#attr_value_is_multivalued").removeAttr("checked")
+  $('#add_edit_item_label').text('Edit Item')
+  $('#add_edit_item_attributes').modal('show')  
+  
+save_item = ()->
+  domain_name = $("#domain_select").val()
+  item_name = $("#item_name").val()
+  attr_name = $("#attr_name").val()
+  attr_value = $("#attr_value_textarea").val()
+  attr_replace = $("#attr_replace").is(":checked")
+  attr_multivalued = $("#attr_value_is_multivalued").is(":checked")
+  attr_multivalued_delimiter = $("#attr_value_delimiter").val()
+  if(attr_multivalued)
+    attr_values = attr_value.split(new RegExp(attr_multivalued_delimiter))
+  else
+    attr_values = [attr_value]
+  sdb.put_attributes(domain_name,item_name,[{name:attr_name,values:attr_values,replace:attr_replace}],(res)->
+    $('#add_edit_item_attributes').modal('hide')
+  )
 
 enable_delete = ()->
   $("button[id^=delete_]").removeAttr("disabled").addClass("danger").removeClass("secondary")
@@ -64,7 +102,6 @@ handle_delete_toggle = ()->
     enable_delete()
 
 handle_query = (results)->
-  console.log(results)
   item_count = results.items.length
   next_token = results.next_token
   if next_token?    
@@ -84,16 +121,45 @@ handle_query = (results)->
         attr_vals = item.attrs[attr_name]
         if attr_vals?
           if attr_vals.length > 1  
-            "<td><table><tbody><tr><td>"+attr_vals.join("</td><td>")+"</td></tr></tbody></table></td>"
+            "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"true\"><table><tbody><tr><td>"+attr_vals.join("</td><td>")+"</td></tr></tbody></table></td>"
           else
-            "<td>#{attr_vals.join('')}</td>"
+            "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"false\">#{attr_vals.join('')}</td>"
         else 
-          "<td></td>"
-      "<tr><td>#{item.name}</td>#{tds.join("")}</tr>"
+          "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"false\"></td>"
+      "<tr data-item-name=\"#{item.name}\"><td>#{item.name}</td>#{tds.join("")}</tr>"
     
     $("#query_results_table > thead").html("<tr><th>Item Name</th>#{ths.join('')}</tr>")
     $("#query_results_table > tbody").html(trs.join(""))
     $("#query_btn").button('reset')
+    
+    # add click listener
+    $("#query_results_table > tbody > tr").each((index, val)->
+      # for each td
+      $(val).children("td").each((jindex, tdval)->
+        #skip 0 index since it is item name
+        if(jindex > 0)
+          id = "edit_image"
+          handler_in = ()->        
+            $(this).append(" <img id=\"#{id}\" src=\"images/attr_edit.png\"/>").click(()->
+              item_name = $(this).parent().attr("data-item-name")
+              attr_name = $(this).attr("data-attr-name")
+              is_multivalued = $(this).attr("data-attr-multivalued") == "true"
+              values = []
+              if(is_multivalued)
+                $(this).children("table").children("tbody").children("tr").children("td").each((index, el)->
+                  values.push($(el).text())
+                )
+              else
+                values.push($(this).text())
+              edit_item("Person", item_name, attr_name, values)
+            )
+          handler_out = ()->
+            $("#"+id).remove()
+          $(tdval).hover(handler_in,handler_out)
+        
+      )   
+      
+    )
       
         
 query = (next_token=null)->
@@ -104,7 +170,6 @@ query = (next_token=null)->
 
 metadata = (domain)->
   sdb.domain_metadata(domain, (res)->
-    console.log("metadata", res)
     $("#domain_metadata_label").html("<h2>#{domain} <small>Metadata</small></h2>")
     $("input[name=itemCount]").val(res.item_count)
     $("input[name=itemNamesSizeBytes]").val(res.item_names_size_bytes)

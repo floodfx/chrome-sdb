@@ -55,29 +55,29 @@
     <div class='container-fluid'>
       <div class='content'>
         <div class='row'>
-          <div class='span12 offset1'>
+          <div class='span8 offset1'>
             <div class='clearfix'>
               <h3 for='query'>
                 Query
+                <input class='btn primary pull-right' data-loading-text='Running query...' id='query_btn' onclick='query()' type='button' value='Run Query' />
               </h3>
               <div class='input'>
-                <textarea class='xxlarge' id='query_expr' name='query' rows='3'></textarea>
+                <textarea class='span8' id='query_expr' name='query' rows='3'></textarea>
                 <span class='help-block'>
                   Check out the docs...
                 </span>
               </div>
-              <input class='btn primary' data-loading-text='Running query...' id='query_btn' onclick='query()' type='button' value='Run Query' />
             </div>
           </div>
         </div>
         <div class='row'>
           <div class='span15 offset1'>
-            <h3 style='padding-top:20px'>
+            <h3>
               Query Results
+              <button class='btn info pull-right' disabled='disabled' id='next_page_btn'>
+                Next page &raquo;
+              </button>
             </h3>
-            <button class='btn info' disabled='disabled' id='next_page_btn'>
-              Next page &raquo;
-            </button>
             <table class='bordered-table zebra-striped condensed-table' id='query_results_table'>
               <thead>
                 <tr>
@@ -105,38 +105,118 @@
         </div>
       </div>
       <div class='sidebar' style='padding-left:10px'>
-        <div class='span4'>
-          <div class='row'>
-            <h3>
-              Domains
-            </h3>
-            <select id='region_select' name='region'></select>
-            <div class='overflow' style='height:250px; overflow:auto;margin-bottom:10px'>
-              <table class='bordered-table zebra-striped condensed-table' id='domains_table'>
-                <tbody>
-                  <tr>
-                    <td rowspan='2'>
-                      No Domains...
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class='row'>
-            <a class='btn primary' data-backdrop='static' data-controls-modal='create_domain_modal' href='#' id='create_domain'>
-              Create Domain
-            </a>
-            <button class='btn warning' id='domain_deletion_control' onclick='handle_delete_toggle()'>
-              Enable Delete
+        <div class='row'>
+          <h3>
+            Domains
+            <button class='btn info pull-right' data-backdrop='static' data-controls-modal='add_edit_item_attributes' id='add_item' onclick="$('#add_edit_item_label').text('Add Item')">
+              Add Item
             </button>
+          </h3>
+          <select id='region_select' name='region'></select>
+          <div class='overflow' style='height:350px; width: 250px; overflow:auto; margin-bottom:10px;margin-top:10px'>
+            <table class='bordered-table zebra-striped condensed-table' id='domains_table'>
+              <tbody>
+                <tr>
+                  <td rowspan='2'>
+                    No Domains...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
+        <div class='row'>
+          <a class='btn primary' data-backdrop='static' data-controls-modal='create_domain_modal' href='#' id='create_domain'>
+            Create Domain
+          </a>
+          <button class='btn warning pull-right' id='domain_deletion_control' onclick='handle_delete_toggle()'>
+            Enable Delete
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class='modal hide fade' id='add_edit_item_attributes' style='display:none;'>
+      <div class='modal-header'>
+        <a class='close' href='#'>
+          x
+        </a>
+        <h3 id='add_edit_item_label'>
+          Add/Edit Item
+        </h3>
+      </div>
+      <div class='modal-body'>
+        <form>
+          <fieldset style='padding-top:0px'>
+            <div class='clearfix2'>
+              <label for='item_domain_name'>
+                Domain
+              </label>
+              <div class='input'>
+                <select id='domain_select' name='item_domain_name'></select>
+              </div>
+            </div>
+            <div class='clearfix2'>
+              <label for='item_name'>
+                Item Name
+              </label>
+              <div class='input'>
+                <input id='item_name' name='item_name' type='text' />
+              </div>
+            </div>
+            <div class='clearfix2'>
+              <label for='attr_name'>
+                Attribute Name
+              </label>
+              <div class='input'>
+                <input id='attr_name' name='attr_name' type='text' />
+              </div>
+            </div>
+            <div class='clearfix2'>
+              <label for='attr_value'>
+                Attribute Value
+              </label>
+              <div class='input'>
+                <textarea cols='20' id='attr_value_textarea' name='attr_value_textarea' rows='1'></textarea>
+              </div>
+            </div>
+            <div class='clearfix2'>
+              <label for='attr_replace'></label>
+              <div class='input'>
+                <input id='attr_replace' name='attr_replace' type='checkbox' value='yes_or_no' />
+                <span>Replace existing attribute value(s)</span>
+              </div>
+            </div>
+            <div class='clearfix2'>
+              <label for='attr_value_is_multivalued'></label>
+              <div class='input'>
+                <input id='attr_value_is_multivalued' name='attr_value_is_multivalued' type='checkbox' value='yes_or_no' />
+                <span>Attribute is multi-valued</span>
+              </div>
+            </div>
+            <div class='clearfix2'>
+              <div class='input'>
+                <label for='attr_value_delimiter'>
+                  Multi-valued Delim (RegExp)
+                </label>
+                <input class='span1' id='attr_value_delimiter' name='attr_value_delimiter' style='margin-left:10px' type='text' value='\n' />
+              </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class='modal-footer'>
+        <button class='btn info' id='save_attribute_btn' onclick='save_item()'>
+          Save
+        </button>
+        <input class='btn' id='reset_attribute_btn' type='reset' />
+        <a href='#' onclick="$('#add_edit_item_attributes').modal('hide')">
+          Cancel
+        </a>
       </div>
     </div>
     <div class='modal hide fade' id='create_domain_modal' style='display: none;'>
       <div class='modal-header'>
-        <a class='close' href='#' id='close-model'>
+        <a class='close' href='#'>
           x
         </a>
         <h3>
