@@ -75,23 +75,27 @@
         .row
           .span15.offset1
             %footer.actions
-              If you find this tool useful, consider purchasing it.
+              %span.brandfont
+                Simple DB Tool v0.1
+              |
+              %a(href="https://github.com/floodfx/chrome-sdb/issues")
+                Feedback / Bugs / Feature requests?
 
                   
       .sidebar(style="padding-left:10px")
-        .row
+        .row(style="width:250px")
           %h3
             Domains
             %button.btn.info.pull-right#add_item(data-controls-modal="add_edit_item_attributes" data-backdrop="static" onclick="add_item()")
               Add Item
-          %select#region_select(name="region")                                                      
+          %select#region_select(name="region" style="width:250px")      
           .overflow(style="height:350px; width: 250px; overflow:auto; margin-bottom:10px;margin-top:10px")
             %table.bordered-table.zebra-striped.condensed-table#domains_table                    
               %tbody
                 %tr
                   %td(rowspan="2")
                     No Domains...        
-        .row
+        .row(style="width:250px")
           %a.btn.primary#create_domain(href="#" data-controls-modal="create_domain_modal" data-backdrop="static") 
             Create Domain  
           %button.btn.warning.pull-right#domain_deletion_control(onclick="handle_delete_toggle()") 

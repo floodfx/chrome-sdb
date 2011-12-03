@@ -19,8 +19,8 @@
   
     .topbar
       .fill
-        .container
-          %a.brand(href="/chrome-sdb.html")
+        .container-fluid
+          %a.brand.brandfont(href="/chrome-sdb.html")
             Simple DB Tool
           %ul.nav
             %li
@@ -33,11 +33,43 @@
               %a(href="/about.html") 
                 About
                   
-    .container 
-      .row
-        .span4.offset4
-          %h2
+    .container-fluid
+      .content
+        .row.span8
+          %h1
             About
+          %h3.brandfont
+            Simple DB Tool v0.1
           %p
-            Simple DB Tool 
-    
+            This tool is built for Simple DB developers everywhere!  Please use it and provide 
+            %a(href="https://github.com/floodfx/chrome-sdb/issues") 
+              feedback.
+          %h3
+            New tool replacing old tool
+          %p
+            This is a new tool that replaces the old Firefox plugin tool (
+            %a(href="https://github.com/floodfx/sdbtool")
+              Sdbtool
+            ) that I wrote a few years back and which has been a PITA to keep updated as Firefox started releasing new updates every couple of weeks and required updating the plugin...  Plus, Chrome is just faster than Firefox. :)
+          %h3
+            Open Source
+          %p
+            Chrome Simple DB Tool is  
+            %a(href="https://github.com/floodfx/chrome-sdb") 
+              open source.  
+            Pull requests are happily accepted!           
+          %h3
+            Chrome Store
+          %p
+            We also hope to get this listed in the Google Chrome store...eventually.  
+            
+
+        .row.span12
+          %footer.actions
+            %span.brandfont
+              Simple DB Tool v0.1
+            |
+            %a(href="https://github.com/floodfx/chrome-sdb/issues")
+              Feedback / Bugs / Feature requests?
+          
+  

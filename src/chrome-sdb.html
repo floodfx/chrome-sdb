@@ -99,20 +99,26 @@
         <div class='row'>
           <div class='span15 offset1'>
             <footer class='actions'>
-              If you find this tool useful, consider purchasing it.
+              <span class='brandfont'>
+                Simple DB Tool v0.1
+              </span>
+              |
+              <a href='https://github.com/floodfx/chrome-sdb/issues'>
+                Feedback / Bugs / Feature requests?
+              </a>
             </footer>
           </div>
         </div>
       </div>
       <div class='sidebar' style='padding-left:10px'>
-        <div class='row'>
+        <div class='row' style='width:250px'>
           <h3>
             Domains
             <button class='btn info pull-right' data-backdrop='static' data-controls-modal='add_edit_item_attributes' id='add_item' onclick='add_item()'>
               Add Item
             </button>
           </h3>
-          <select id='region_select' name='region'></select>
+          <select id='region_select' name='region' style='width:250px'></select>
           <div class='overflow' style='height:350px; width: 250px; overflow:auto; margin-bottom:10px;margin-top:10px'>
             <table class='bordered-table zebra-striped condensed-table' id='domains_table'>
               <tbody>
@@ -125,7 +131,7 @@
             </table>
           </div>
         </div>
-        <div class='row'>
+        <div class='row' style='width:250px'>
           <a class='btn primary' data-backdrop='static' data-controls-modal='create_domain_modal' href='#' id='create_domain'>
             Create Domain
           </a>

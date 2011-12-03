@@ -20,8 +20,8 @@
   
     .topbar
       .fill
-        .container
-          %a.brand(href="/chrome-sdb.html")
+        .container-fluid
+          %a.brand.brandfont(href="/chrome-sdb.html")
             Simple DB Tool
           %ul.nav
             %li
@@ -103,10 +103,12 @@
       
       
     
-    .container
-      .fill
-        .row
-          .span16
-            %footer.actions
-              If you find this tool useful, consider purchasing it.
+      .row
+        .span16
+          %footer.actions
+            %span.brandfont
+              Simple DB Tool v0.1
+            |
+            %a(href="https://github.com/floodfx/chrome-sdb/issues")
+              Feedback / Bugs / Feature requests?
     
