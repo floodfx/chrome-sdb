@@ -48,12 +48,41 @@
     <div class='container-fluid'>
       <div class='content'>
         <div class='row'>
-          <div class='span12 offset1' id='message_box' style='display:none;'></div>
+          <div class='span10 offset1' id='message_box' style='display:none;'>
+            <div class='alert-message block-message error'>
+              <a class='close' href="$('#message_box').hide()">
+                x
+              </a>
+              <p>
+                <strong>
+                  To err is human...
+                </strong>
+                Here is what happened:
+              </p>
+              <p>
+                <strong>
+                  <span id='error_code'>
+                    Error Code
+                  </span>
+                </strong>
+                <br />
+                <span id='error_msg'>
+                  Error Msg
+                </span>
+              </p>
+              <p>
+                <a href='' id='error_url' target='_new'>
+                  Request URL
+                </a>
+              </p>
+              <div class='alert-actions'>
+                <button class='btn small' onclick="$('#message_box').hide()">
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    <div class='container-fluid'>
-      <div class='content'>
         <div class='row'>
           <div class='span8 offset1'>
             <div class='clearfix'>
@@ -64,7 +93,11 @@
               <div class='input'>
                 <textarea class='span8' id='query_expr' name='query' rows='3'></textarea>
                 <span class='help-block'>
-                  Check out the docs...
+                  Check out
+                  <a href='http://aws.amazon.com/documentation/simpledb/'>
+                    documentation
+                  </a>
+                  on SimpleDB
                 </span>
               </div>
             </div>

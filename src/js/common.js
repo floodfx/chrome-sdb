@@ -228,9 +228,10 @@ var __indexOf = Array.prototype.indexOf || function(item) {
   return -1;
 };
 SimpleDB = (function() {
-  function SimpleDB(profile, secure) {
+  function SimpleDB(profile, secure, error_callback) {
     this.profile = profile;
     this.secure = secure != null ? secure : false;
+    this.error_callback = error_callback != null ? error_callback : this.default_callback;
     this.protocol = this.secure ? "https" : "http";
     this.endpoint = this.profile.get_settings().get_region();
     this.sdb_base_url = "" + this.protocol + "://" + this.endpoint + "?";
@@ -238,8 +239,14 @@ SimpleDB = (function() {
   SimpleDB.prototype.set_profile = function(profile) {
     return this.profile = profile;
   };
-  SimpleDB.prototype.default_callback = function(results) {
-    return console.log(results);
+  SimpleDB.prototype.default_callback = function(results, xmldoc) {
+    if (xmldoc == null) {
+      xmldoc = null;
+    }
+    console.log(results);
+    if (xmldoc !== null) {
+      return console.log(xmldoc);
+    }
   };
   SimpleDB.prototype.build_request_url = function(action, params) {
     var encoded_params, k, v;
@@ -299,7 +306,7 @@ SimpleDB = (function() {
       type = "GET";
     }
     if (error_callback == null) {
-      error_callback = callback;
+      error_callback = this.error_callback;
     }
     req_success_callback = function(data, text_status) {
       return callback(SimpleDB.parse_metadata(data, text_status, url), data);
@@ -347,9 +354,6 @@ SimpleDB = (function() {
     }
     return this.ajax_request(this.build_request_url("ListDomains", params), function(result, data) {
       var domains;
-      if ((result.error != null)) {
-        callback(result);
-      }
       domains = [];
       $("DomainName", data).each(function(i) {
         return domains.push($(this).text());
@@ -366,9 +370,6 @@ SimpleDB = (function() {
     return this.ajax_request(this.build_request_url("DomainMetadata", {
       "DomainName": domain_name
     }), function(result, data) {
-      if ((result.error != null)) {
-        callback(result);
-      }
       result.creation_date_time = $("CreationDateTime", data).text();
       result.item_count = parseInt($("ItemCount", data).text());
       result.item_names_size_bytes = parseInt($("ItemNamesSizeBytes", data).text());
@@ -396,9 +397,6 @@ SimpleDB = (function() {
     }
     return this.ajax_request(this.build_request_url("Select", params), function(result, data) {
       var attr_name, attr_name2, attr_names, items;
-      if ((result.error != null)) {
-        callback(result);
-      }
       items = [];
       attr_names = {};
       $("Item", data).each(function(i) {

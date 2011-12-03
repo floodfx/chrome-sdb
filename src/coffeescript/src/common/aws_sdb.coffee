@@ -2,7 +2,7 @@
 
 class SimpleDB
 
-  constructor:(@profile, @secure=false)->
+  constructor:(@profile, @secure=false, @error_callback=this.default_callback)->
     @protocol = if(@secure) then "https" else "http"
     @endpoint = @profile.get_settings().get_region()
     @sdb_base_url = "#{@protocol}://#{@endpoint}?"
@@ -10,8 +10,9 @@ class SimpleDB
   set_profile:(profile)->
     @profile=profile
     
-  default_callback:(results)->
+  default_callback:(results, xmldoc=null)->
     console.log(results)
+    console.log(xmldoc) unless xmldoc == null
     
   build_request_url: (action, params)->
     # add required params
@@ -45,7 +46,7 @@ class SimpleDB
       }
     }
     
-  ajax_request: (url, callback, type="GET", error_callback=callback)->
+  ajax_request: (url, callback, type="GET", error_callback=@error_callback)->
     # use jquery to make request
     req_success_callback = (data, text_status)->
       callback(SimpleDB.parse_metadata(data,text_status, url), data)
@@ -76,8 +77,6 @@ class SimpleDB
     params["NextToken"] = next_token if next_token
 
     this.ajax_request(this.build_request_url("ListDomains", params), (result, data)->
-      if(result.error?) 
-        callback(result) # TODO handle better than just return the error
       domains = []
       $("DomainName", data).each((i)->
         domains.push($(this).text())
@@ -91,8 +90,6 @@ class SimpleDB
   domain_metadata: (domain_name, callback=this.default_callback)->
   
     this.ajax_request(this.build_request_url("DomainMetadata", {"DomainName":domain_name}), (result, data)->
-      if(result.error?)  
-        callback(result)# just return the error
       result.creation_date_time = $("CreationDateTime", data).text()
       result.item_count = parseInt($("ItemCount", data).text())
       result.item_names_size_bytes = parseInt($("ItemNamesSizeBytes", data).text())
@@ -112,8 +109,6 @@ class SimpleDB
     params["NextToken"] = next_token if next_token                                 
   
     this.ajax_request(this.build_request_url("Select", params), (result, data)->
-      if(result.error?)  
-        callback(result)
       items = []
       attr_names = {}
       $("Item", data).each((i)->
@@ -176,7 +171,6 @@ class SimpleDB
         attr_param_count += 1
 
     this.ajax_request(this.build_request_url("PutAttributes", params), (result, data)->
-      #TODO handle error
       callback(result)
     )
     
@@ -201,7 +195,6 @@ class SimpleDB
         attr_param_count += 1 
 
     this.ajax_request(this.build_request_url("DeleteAttributes", params), (result, data)->
-      #TODO handle error
       callback(result)
     )
   
@@ -230,7 +223,6 @@ class SimpleDB
           params["Item.#{i}.Attribute.#{attr_param_count}.Name"] = attr_object["name"]
           attr_param_count += 1
     this.ajax_request(this.build_request_url("BatchDeleteAttributes", params), (result, data)->
-      #TODO handle error
       callback(result)
     )
      
@@ -257,19 +249,16 @@ class SimpleDB
             params["Item.#{i}.Attribute.#{attr_param_count}.Replace"] = true 
           attr_param_count += 1
     this.ajax_request(this.build_request_url("BatchPutAttributes", params), (result, data)->
-      #TODO handle error
       callback(result)
     ) 
   
   create_domain: (domain_name, callback=this.default_callback)->
     this.ajax_request(this.build_request_url("CreateDomain", {"DomainName":domain_name}), (result, data)->
-      #TODO handle error
       callback(result)
     )
 
   delete_domain: (domain_name, callback=this.default_callback)->
     this.ajax_request(this.build_request_url("DeleteDomain", {"DomainName":domain_name}), (result, data)->
-      #TODO handle error
       callback(result)
     )
 

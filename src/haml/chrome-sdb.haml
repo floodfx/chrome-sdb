@@ -35,14 +35,33 @@
               %a(href="/about.html") 
                 About
                   
-    .container-fluid
-      .content
-        .row
-          .span12.offset1#message_box(style="display:none;")             
-    
+       
     .container-fluid      
       .content
-      
+        .row
+          .span10.offset1#message_box(style="display:none;")
+            .alert-message.block-message.error
+              %a.close(href="$('#message_box').hide()")
+                x
+              %p
+                %strong
+                  To err is human...
+                Here is what happened:
+              %p
+                %strong
+                  %span#error_code
+                    Error Code
+                %br
+                %span#error_msg
+                  Error Msg
+              %p
+                %a#error_url(href="" target="_new")
+                  Request URL
+              .alert-actions
+                %button.btn.small(onclick="$('#message_box').hide()")
+                  Close
+                  
+                  
         .row        
           .span8.offset1
             .clearfix
@@ -52,7 +71,10 @@
               .input
                 %textarea.span8#query_expr{:name => "query", :rows => 3}
                 %span.help-block
-                  Check out the docs...
+                  Check out 
+                  %a(href="http://aws.amazon.com/documentation/simpledb/")
+                    documentation
+                  on SimpleDB
                                        
               
 

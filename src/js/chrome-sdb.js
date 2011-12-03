@@ -411,9 +411,10 @@ var __indexOf = Array.prototype.indexOf || function(item) {
   return -1;
 };
 SimpleDB = (function() {
-  function SimpleDB(profile, secure) {
+  function SimpleDB(profile, secure, error_callback) {
     this.profile = profile;
     this.secure = secure != null ? secure : false;
+    this.error_callback = error_callback != null ? error_callback : this.default_callback;
     this.protocol = this.secure ? "https" : "http";
     this.endpoint = this.profile.get_settings().get_region();
     this.sdb_base_url = "" + this.protocol + "://" + this.endpoint + "?";
@@ -421,8 +422,14 @@ SimpleDB = (function() {
   SimpleDB.prototype.set_profile = function(profile) {
     return this.profile = profile;
   };
-  SimpleDB.prototype.default_callback = function(results) {
-    return console.log(results);
+  SimpleDB.prototype.default_callback = function(results, xmldoc) {
+    if (xmldoc == null) {
+      xmldoc = null;
+    }
+    console.log(results);
+    if (xmldoc !== null) {
+      return console.log(xmldoc);
+    }
   };
   SimpleDB.prototype.build_request_url = function(action, params) {
     var encoded_params, k, v;
@@ -482,7 +489,7 @@ SimpleDB = (function() {
       type = "GET";
     }
     if (error_callback == null) {
-      error_callback = callback;
+      error_callback = this.error_callback;
     }
     req_success_callback = function(data, text_status) {
       return callback(SimpleDB.parse_metadata(data, text_status, url), data);
@@ -530,9 +537,6 @@ SimpleDB = (function() {
     }
     return this.ajax_request(this.build_request_url("ListDomains", params), function(result, data) {
       var domains;
-      if ((result.error != null)) {
-        callback(result);
-      }
       domains = [];
       $("DomainName", data).each(function(i) {
         return domains.push($(this).text());
@@ -549,9 +553,6 @@ SimpleDB = (function() {
     return this.ajax_request(this.build_request_url("DomainMetadata", {
       "DomainName": domain_name
     }), function(result, data) {
-      if ((result.error != null)) {
-        callback(result);
-      }
       result.creation_date_time = $("CreationDateTime", data).text();
       result.item_count = parseInt($("ItemCount", data).text());
       result.item_names_size_bytes = parseInt($("ItemNamesSizeBytes", data).text());
@@ -579,9 +580,6 @@ SimpleDB = (function() {
     }
     return this.ajax_request(this.build_request_url("Select", params), function(result, data) {
       var attr_name, attr_name2, attr_names, items;
-      if ((result.error != null)) {
-        callback(result);
-      }
       items = [];
       attr_names = {};
       $("Item", data).each(function(i) {
@@ -914,14 +912,25 @@ Profile = (function() {
     return Storage.set("chrome-sdb.profiles", Profile.profiles_json(new_profiles), true);
   };
   return Profile;
-})();var add_item, confirm_delete, delete_domain, disable_delete, domain_from_query, edit_item, enable_delete, handle_delete_toggle, handle_query, metadata, profile, query, save_domain, save_item, sdb, update_domains_table, update_region;
+})();var add_item, confirm_delete, delete_domain, disable_delete, domain_from_query, edit_item, enable_delete, handle_delete_toggle, handle_error, handle_query, metadata, profile, query, save_domain, save_item, sdb, update_domains_table, update_region;
 profile = Profile.primary();
+handle_error = function(results, xmldoc) {
+  var error_code, error_msg, url;
+  error_code = results.error.code;
+  error_msg = results.error.msg;
+  url = results.meta.req_url;
+  $("#error_code").text(error_code);
+  $("#error_msg").text(error_msg);
+  $("#error_url").attr("href", url);
+  $("#message_box").show();
+  return $("#query_btn").button('reset');
+};
 if (!profile) {
   chrome.tabs.create({
     url: 'config.html'
   });
 } else {
-  sdb = new SimpleDB(profile);
+  sdb = new SimpleDB(profile, false, handle_error);
   $(function() {
     return update_domains_table();
   });
@@ -929,7 +938,7 @@ if (!profile) {
 update_region = function(region) {
   profile.get_settings().use_region(region);
   profile.save();
-  sdb = new SimpleDB(profile);
+  sdb = new SimpleDB(profile, false, handle_error);
   return update_domains_table();
 };
 $(function() {

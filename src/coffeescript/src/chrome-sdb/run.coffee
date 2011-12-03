@@ -7,19 +7,30 @@
 
 profile = Profile.primary()
 
+handle_error = (results, xmldoc)->
+  error_code = results.error.code
+  error_msg = results.error.msg
+  url = results.meta.req_url
+  $("#error_code").text(error_code)
+  $("#error_msg").text(error_msg)
+  $("#error_url").attr("href", url)
+  $("#message_box").show()
+  # reset buttons
+  $("#query_btn").button('reset')
+
 # redirect if no primary profile
 unless profile
   chrome.tabs.create({url:'config.html'}) 
 else
-  sdb = new SimpleDB(profile)  
-  $(()->
+  sdb = new SimpleDB(profile, false, handle_error)
+  $(()->    
     update_domains_table()
   )
   
 update_region = (region)->
   profile.get_settings().use_region(region)
   profile.save()
-  sdb = new SimpleDB(profile)
+  sdb = new SimpleDB(profile, false, handle_error)
   update_domains_table()
  
 # set region options 
@@ -32,6 +43,7 @@ $(()->
     update_region(region)
   )
 )
+  
 
 update_domains_table = (callback=null)->
   sdb.list_domains((res)-> 
@@ -107,6 +119,7 @@ domain_from_query = ()->
   if(domain_match != null) then domain_match[1] else null
 
 handle_query = (results)->
+  $("#message_box").hide()
   item_count = results.items.length
   next_token = results.next_token
   if next_token?    
