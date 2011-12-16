@@ -44,22 +44,22 @@ $(()->
   )
 )
   
+add_domains = (domains)->  
+  if domains.length == 0
+    trs = ["<tr><td>No domains in this region</td></tr>"]
+  else
+    trs = for domain in domains      
+      controls = "<button id=\"metadata_#{domain}\" class=\"btn info\" onclick=\"metadata('#{domain}')\">metadata</a>"
+      controls += " <button id=\"delete_#{domain}\" class=\"btn\" onclick=\"confirm_delete('#{domain}')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>"
+      "<tr><td>#{domain}<br />#{controls}</td></tr>"    
+  $("#domains_table > tbody").html(trs.join(""))    
+  
+  for domain in domains
+    $("#domain_select").append($('<option>', {value:domain}).text(domain))
 
 update_domains_table = (callback=null)->
   sdb.list_domains((res)-> 
-    domains = res["domains"]
-    if domains.length == 0
-      trs = ["<tr><td>No domains in this region</td></tr>"]
-    else
-      trs = for domain in domains      
-        controls = "<button id=\"metadata_#{domain}\" class=\"btn info\" onclick=\"metadata('#{domain}')\">metadata</a>"
-        controls += " <button id=\"delete_#{domain}\" class=\"btn\" onclick=\"confirm_delete('#{domain}')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>"
-        "<tr><td>#{domain}<br />#{controls}</td></tr>"    
-    $("#domains_table > tbody").html(trs.join(""))    
-    
-    for domain in domains
-      $("#domain_select").append($('<option>', {value:domain}).text(domain))
-    
+    add_domains(res["domains"])    
     callback() if callback?
   )
   

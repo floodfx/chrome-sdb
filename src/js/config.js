@@ -1,4 +1,25 @@
-var Settings;
+var after_intro;
+after_intro = function() {
+  Storage.set("chrome-sdb-config-intro", "true");
+  $('#create_profile_modal').modal('show');
+  return guiders.hideAll();
+};
+$(function() {
+  if (Storage.get("chrome-sdb-config-intro") === null) {
+    return guiders.createGuider({
+      buttons: [
+        {
+          name: "Close",
+          onclick: after_intro
+        }
+      ],
+      description: "Welcome to Simple DB Tool for Chrome.  Please setup one or more AWS Credentials to start using this tool!",
+      id: "first",
+      overlay: true,
+      title: "Chrome Simple DB Tool: Configuration"
+    }).show();
+  }
+});var Settings;
 Settings = (function() {
   function Settings(access_key, secret_key, region, version, https_protocol) {
     this.access_key = access_key;
@@ -206,7 +227,7 @@ Profile = (function() {
     return Storage.set("chrome-sdb.profiles", Profile.profiles_json(new_profiles), true);
   };
   return Profile;
-})();var cancel_profile, delete_profile, edit_profile, message, primary, profiles, save_profile, update_profiles_table, use_profile;
+})();var cancel_profile, delete_profile, edit_profile, message, primary, profiles, save_profile, update_profiles_table, use_profile, validate_text_box;
 primary = Profile.primary();
 profiles = Profile.find_all();
 if (Profile.find_all() === []) {
@@ -244,16 +265,38 @@ update_profiles_table = function() {
   return $("#profiles_table > tbody").html(trs.join(""));
 };
 save_profile = function() {
-  var access_key, name, secret_key;
-  name = $("#profile_name").val();
-  access_key = $("#profile_aws_access_key").val();
-  secret_key = $("#profile_aws_secret_key").val();
-  new Profile(name, new Settings(access_key, secret_key)).save();
-  $('#create_profile_modal').modal('hide');
-  return update_profiles_table();
+  var access_key, name, secret_key, valid;
+  valid = true;
+  valid && (valid = validate_text_box("#profile_name", 3, 30));
+  valid && (valid = validate_text_box("#profile_aws_access_key", 15, 25));
+  valid && (valid = validate_text_box("#profile_aws_secret_key", 35, 45));
+  if (valid) {
+    name = $("#profile_name").val();
+    access_key = $("#profile_aws_access_key").val();
+    secret_key = $("#profile_aws_secret_key").val();
+    new Profile(name, new Settings(access_key, secret_key)).save();
+    $('#create_profile_modal').modal('hide');
+    return update_profiles_table();
+  }
+};
+validate_text_box = function(text_box_name, min_length, max_length) {
+  var value;
+  if (min_length == null) {
+    min_length = 0;
+  }
+  if (max_length == null) {
+    max_length = 100;
+  }
+  value = $(text_box_name).val();
+  if (value === null || value.length < min_length || value.length > max_length) {
+    $(text_box_name).parentsUntil("fieldset").addClass("error");
+    return false;
+  } else {
+    $(text_box_name).parentsUntil("fieldset").removeClass("error");
+    return true;
+  }
 };
 cancel_profile = function() {
-  console.log('cancel');
   return $('#create_profile_modal').modal('hide');
 };
 edit_profile = function(profile_name) {

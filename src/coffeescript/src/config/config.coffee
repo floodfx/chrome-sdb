@@ -42,18 +42,32 @@ update_profiles_table = ()->
 
 # handle modal buttons
 save_profile = ()->
-  #TODO validate
-  name = $("#profile_name").val()
-  access_key = $("#profile_aws_access_key").val()
-  secret_key = $("#profile_aws_secret_key").val()
-  new Profile(name, new Settings(access_key,secret_key)).save()
-  # update profiles table
-  $('#create_profile_modal').modal('hide')
-  update_profiles_table()
+  valid = true
+  valid &&= validate_text_box("#profile_name", 3, 30)
+  valid &&= validate_text_box("#profile_aws_access_key", 15, 25)
+  valid &&= validate_text_box("#profile_aws_secret_key", 35, 45)
+
+  if valid
+    name = $("#profile_name").val()  
+    access_key = $("#profile_aws_access_key").val()
+    secret_key = $("#profile_aws_secret_key").val()
+    new Profile(name, new Settings(access_key,secret_key)).save()
+    # update profiles table
+    $('#create_profile_modal').modal('hide')
+    update_profiles_table()
+  
+
+validate_text_box = (text_box_name, min_length = 0, max_length = 100)->
+  value = $(text_box_name).val()
+  if value == null || value.length < min_length || value.length > max_length
+    $(text_box_name).parentsUntil("fieldset").addClass("error")
+    false
+  else
+    $(text_box_name).parentsUntil("fieldset").removeClass("error")
+    true
 
 
 cancel_profile = ()->
-  console.log('cancel')
   $('#create_profile_modal').modal('hide')
 
 

@@ -5,6 +5,7 @@
       =@title
     %link(rel="stylesheet" href="css/bootstrap.css")
     %link(rel="stylesheet" href="css/bootstrap-overrides.css")
+    %link(rel="stylesheet" href="css/guiders-1.2.0.css")
     %link(href="http://fonts.googleapis.com/css?family=Droid+Sans+Mono" rel='stylesheet' type='text/css')
     
     %meta(charset="utf-8")
@@ -16,6 +17,7 @@
     %script(type="text/javascript" src="js/bootstrap-dropdown.js")
     %script(type="text/javascript" src="js/bootstrap-scrollspy.js")
     %script(type="text/javascript" src="js/bootstrap-modal.js")
+    %script(type="text/javascript" src="js/guiders-1.2.0.js")
   %body
   
     .topbar
@@ -53,12 +55,14 @@
                 %input#profile_name(name="name" size="100" type="text")
                 %span.help-block
                   Something like "My Company Creds" or "Personal Account"
+            .clearfix
               %label(for="access_key")
                 AWS Access Key ID
               .input
                 %input#profile_aws_access_key(name="access_key" size="100" type="text")
                 %span.help-block
                   AWS Access Key ID
+            .clearfix
               %label(for="secret_key")
                 AWS Secret Access Key
               .input
