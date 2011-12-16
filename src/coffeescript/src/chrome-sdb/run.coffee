@@ -55,7 +55,7 @@ add_domains = (domains)->
   $("#domains_table > tbody").html(trs.join(""))    
   
   for domain in domains
-    $("#domain_select").remove("option")
+    $("#domain_select > option").remove()
     $("#domain_select").append($('<option>', {value:domain}).text(domain))
 
 update_domains_table = (callback=null)->
@@ -149,7 +149,6 @@ handle_query = (results)->
     
     $("#query_results_table > thead").html("<tr><th>Item Name</th>#{ths.join('')}</tr>")
     $("#query_results_table > tbody").html(trs.join(""))
-    $("#query_btn").button('reset')
     
     # add click listener
     $("#query_results_table > tbody > tr").each((index, val)->
@@ -179,6 +178,7 @@ handle_query = (results)->
       )   
       
     )
+  $("#query_btn").button('reset')
       
         
 query = (next_token=null)->
