@@ -55,6 +55,7 @@ add_domains = (domains)->
   $("#domains_table > tbody").html(trs.join(""))    
   
   for domain in domains
+    $("#domain_select").remove("option")
     $("#domain_select").append($('<option>', {value:domain}).text(domain))
 
 update_domains_table = (callback=null)->

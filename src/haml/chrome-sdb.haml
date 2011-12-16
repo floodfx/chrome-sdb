@@ -43,7 +43,7 @@
         .row
           .span10.offset1#message_box(style="display:none;")
             .alert-message.block-message.error
-              %a.close(href="$('#message_box').hide()")
+              %a.close(href="#" onclick="$('#message_box').hide()")
                 x
               %p
                 %strong

@@ -14,7 +14,6 @@
   ],
   "icons" : {
     "16" : "images/chrome-sdb-16.png",
-    "48" : "images/chrome-sdb-48.png",
     "128" : "images/chrome-sdb-128.png"
   }
 }

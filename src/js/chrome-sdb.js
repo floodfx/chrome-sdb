@@ -977,6 +977,7 @@ add_domains = function(domains) {
   _results = [];
   for (_i = 0, _len = domains.length; _i < _len; _i++) {
     domain = domains[_i];
+    $("#domain_select").remove("option");
     _results.push($("#domain_select").append($('<option>', {
       value: domain
     }).text(domain)));
@@ -1198,17 +1199,10 @@ save_domain = function() {
       return $('#create_domain_modal').modal('hide');
     });
   });
-};var add_sample_domain, finish_tour, optional_add_domain, remove_sample_domain, sample_query, sample_query_results;
+};var add_sample_domain, finish_tour, optional_add_domain, sample_query, sample_query_results;
 add_sample_domain = function() {
   if ($("#domain_select > option").length < 1) {
     return add_domains(["example_domain_chrome_sdb"]);
-  }
-};
-remove_sample_domain = function() {
-  var options;
-  options = $("#domain_select > option");
-  if (options.length === 1 && options[0].attr("name") === "example_domain_chrome_sdb") {
-    return $("#domain_select").remove("option");
   }
 };
 optional_add_domain = function() {
@@ -1246,7 +1240,7 @@ finish_tour = function() {
   };
   handle_query(results);
   $("#query_expr").val("");
-  remove_sample_domain();
+  update_domains_table();
   Storage.set("chrome-sdb-intro", "true");
   return guiders.hideAll();
 };

@@ -2,11 +2,6 @@ add_sample_domain = ()->
   if($("#domain_select > option").length < 1)  
     add_domains(["example_domain_chrome_sdb"])
 
-remove_sample_domain = ()->
-  options = $("#domain_select > option")
-  if(options.length == 1 && options[0].attr("name") == "example_domain_chrome_sdb")
-    $("#domain_select").remove("option")
-    
 optional_add_domain = ()->
   add_sample_domain()
   guiders.next()
@@ -29,7 +24,7 @@ finish_tour = ()->
     attr_names:[]
   handle_query(results)
   $("#query_expr").val("")
-  remove_sample_domain()
+  update_domains_table()
   Storage.set("chrome-sdb-intro", "true")
   guiders.hideAll()
 
