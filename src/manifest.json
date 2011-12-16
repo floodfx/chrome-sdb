@@ -15,5 +15,6 @@
   "icons" : {
     "16" : "images/chrome-sdb-tool-16.png",
     "128" : "images/chrome-sdb-tool-128.png"
-  }
+  },
+  "update_url": "http://com-bizo-public.s3.amazonaws.com/tools/chrome-sdb/updates.xml"
 }
