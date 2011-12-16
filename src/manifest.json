@@ -13,7 +13,7 @@
     "tabs"  
   ],
   "icons" : {
-    "16" : "images/chrome-sdb-16.png",
-    "128" : "images/chrome-sdb-128.png"
+    "16" : "images/chrome-sdb-tool-16.png",
+    "128" : "images/chrome-sdb-tool-128.png"
   }
 }
