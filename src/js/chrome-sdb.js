@@ -959,10 +959,8 @@ $(function() {
 });
 $(function() {
   $("#domain_table_div").height($(window).height() - 200);
-  console.log($("#domain_table_div").height());
   return $(window).resize(function() {
-    $("#domain_table_div").height($(this).height() - 200);
-    return console.log($("#domain_table_div").height());
+    return $("#domain_table_div").height($(this).height() - 200);
   });
 });
 add_domains = function(domains) {
@@ -983,10 +981,10 @@ add_domains = function(domains) {
     })();
   }
   $("#domains_table > tbody").html(trs.join(""));
+  $("#domain_select > option").remove();
   _results = [];
   for (_i = 0, _len = domains.length; _i < _len; _i++) {
     domain = domains[_i];
-    $("#domain_select > option").remove();
     _results.push($("#domain_select").append($('<option>', {
       value: domain
     }).text(domain)));

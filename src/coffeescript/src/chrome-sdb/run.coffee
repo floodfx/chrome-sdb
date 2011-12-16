@@ -62,9 +62,9 @@ add_domains = (domains)->
       controls += " <button id=\"delete_#{domain}\" class=\"btn\" onclick=\"confirm_delete('#{domain}')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>"
       "<tr><td>#{domain}<br />#{controls}</td></tr>"    
   $("#domains_table > tbody").html(trs.join(""))    
-  
+
+  $("#domain_select > option").remove()  
   for domain in domains
-    $("#domain_select > option").remove()
     $("#domain_select").append($('<option>', {value:domain}).text(domain))
 
 update_domains_table = (callback=null)->
