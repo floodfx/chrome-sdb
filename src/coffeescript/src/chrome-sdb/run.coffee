@@ -20,7 +20,7 @@ handle_error = (results, xmldoc)->
 
 # redirect if no primary profile
 unless profile
-  chrome.tabs.create({url:'config.html'}) 
+  window.location = "config.html"
 else
   sdb = new SimpleDB(profile, false, handle_error)
   $(()->    

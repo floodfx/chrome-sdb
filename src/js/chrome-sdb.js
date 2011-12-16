@@ -926,9 +926,7 @@ handle_error = function(results, xmldoc) {
   return $("#query_btn").button('reset');
 };
 if (!profile) {
-  chrome.tabs.create({
-    url: 'config.html'
-  });
+  window.location = "config.html";
 } else {
   sdb = new SimpleDB(profile, false, handle_error);
   $(function() {
