@@ -957,6 +957,14 @@ $(function() {
     return update_region(region);
   });
 });
+$(function() {
+  $("#domain_table_div").height($(window).height() - 200);
+  console.log($("#domain_table_div").height());
+  return $(window).resize(function() {
+    $("#domain_table_div").height($(this).height() - 200);
+    return console.log($("#domain_table_div").height());
+  });
+});
 add_domains = function(domains) {
   var controls, domain, trs, _i, _len, _results;
   if (domains.length === 0) {

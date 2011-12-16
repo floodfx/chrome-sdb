@@ -43,6 +43,15 @@ $(()->
     update_region(region)
   )
 )
+
+# keep domains table height optimal
+$(()->
+  $("#domain_table_div").height($(window).height()-200)
+  $(window).resize(()->
+    $("#domain_table_div").height($(this).height()-200)
+  )
+)
+
   
 add_domains = (domains)->  
   if domains.length == 0

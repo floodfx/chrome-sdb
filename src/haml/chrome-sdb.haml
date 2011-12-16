@@ -114,13 +114,13 @@
             %button.btn.info.pull-right#add_item(data-controls-modal="add_edit_item_attributes" data-backdrop="static" onclick="add_item()")
               Add Item
           %select#region_select(name="region" style="width:250px")      
-          .overflow(style="height:350px; width: 250px; overflow:auto; margin-bottom:10px;margin-top:10px")
+          .overflow#domain_table_div(style="width: 250px; overflow:auto; margin-bottom:10px;margin-top:10px")
             %table.bordered-table.zebra-striped.condensed-table#domains_table                    
               %tbody
                 %tr
                   %td(rowspan="2")
                     No Domains...        
-        .row(style="width:250px")
+        .row(style="width:250px;margin-bottom:20px")
           %a.btn.primary#create_domain(href="#" data-controls-modal="create_domain_modal" data-backdrop="static") 
             Create Domain  
           %button.btn.warning.pull-right#domain_deletion_control(onclick="handle_delete_toggle()") 
