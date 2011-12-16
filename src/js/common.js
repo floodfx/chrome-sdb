@@ -287,6 +287,9 @@ SimpleDB = (function() {
       }, {
         name: "Asia Pacific (Tokyo) Region",
         endpoint: "sdb.ap-northeast-1.amazonaws.com"
+      }, {
+        name: "South America (Sao Paulo) Region",
+        endpoint: "sdb.sa-east-1.amazonaws.com"
       }
     ];
   };

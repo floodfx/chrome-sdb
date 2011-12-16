@@ -33,7 +33,8 @@ class SimpleDB
       {name:"US West (Northern California) Region", endpoint:"sdb.us-west-1.amazonaws.com"},
       {name:"EU (Ireland) Region", endpoint:"sdb.eu-west-1.amazonaws.com"},
       {name:"Asia Pacific (Singapore) Region", endpoint:"sdb.ap-southeast-1.amazonaws.com"},
-      {name:"Asia Pacific (Tokyo) Region", endpoint:"sdb.ap-northeast-1.amazonaws.com"}
+      {name:"Asia Pacific (Tokyo) Region", endpoint:"sdb.ap-northeast-1.amazonaws.com"},
+      {name:"South America (Sao Paulo) Region", endpoint:"sdb.sa-east-1.amazonaws.com"}
     ]
     
   @parse_metadata: (data, text_status, req_url)->
