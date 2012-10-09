@@ -15,6 +15,6 @@ mkdir -p $TARGET_DIR/js
 # copy files
 cp -f $SRC_DIR/manifest.json $TARGET_DIR
 cp -f $SRC_DIR/*.html $TARGET_DIR
-cp -fr $SRC_DIR/images/ $TARGET_DIR/images
-cp -fr $SRC_DIR/css/ $TARGET_DIR/css
-cp -fr $SRC_DIR/js/ $TARGET_DIR/js
+cp -fr $SRC_DIR/images/* $TARGET_DIR/images
+cp -fr $SRC_DIR/css/* $TARGET_DIR/css
+cp -fr $SRC_DIR/js/* $TARGET_DIR/js
