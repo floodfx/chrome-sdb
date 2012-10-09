@@ -18,3 +18,7 @@ form .clearfix2:before, form .clearfix2:after {
 form .clearfix2:after {
   clear: both;
 }
+
+img.edititem {
+  margin-left: 5px;
+}

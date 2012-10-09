@@ -23,23 +23,23 @@ unless profile
   window.location = "config.html"
 else
   sdb = new SimpleDB(profile, false, handle_error)
-  $(()->    
+  $(()->
     update_domains_table()
   )
-  
+
 update_region = (region)->
   profile.get_settings().use_region(region)
   profile.save()
   sdb = new SimpleDB(profile, false, handle_error)
   update_domains_table()
- 
-# set region options 
+
+# set region options
 $(()->
   for region in SimpleDB.regions()
     $("#region_select").append($('<option>', { value:region["endpoint"] }).text(region["name"]))
   $("#region_select").val(profile.get_settings().get_region())
   $("#region_select").change(()->
-    region = $("#region_select").val()    
+    region = $("#region_select").val()
     update_region(region)
   )
 )
@@ -52,27 +52,27 @@ $(()->
   )
 )
 
-  
-add_domains = (domains)->  
+
+add_domains = (domains)->
   if domains.length == 0
     trs = ["<tr><td>No domains in this region</td></tr>"]
   else
-    trs = for domain in domains      
+    trs = for domain in domains
       controls = "<button id=\"metadata_#{domain}\" class=\"btn info\" onclick=\"metadata('#{domain}')\">metadata</a>"
       controls += " <button id=\"delete_#{domain}\" class=\"btn\" onclick=\"confirm_delete('#{domain}')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>"
-      "<tr><td>#{domain}<br />#{controls}</td></tr>"    
-  $("#domains_table > tbody").html(trs.join(""))    
+      "<tr><td>#{domain}<br />#{controls}</td></tr>"
+  $("#domains_table > tbody").html(trs.join(""))
 
-  $("#domain_select > option").remove()  
+  $("#domain_select > option").remove()
   for domain in domains
     $("#domain_select").append($('<option>', {value:domain}).text(domain))
 
 update_domains_table = (callback=null)->
-  sdb.list_domains((res)-> 
-    add_domains(res["domains"])    
+  sdb.list_domains((res)->
+    add_domains(res["domains"])
     callback() if callback?
   )
-  
+
 add_item = ()->
   $("#domain_select").val(domain_from_query())
   $("#item_name").val("")
@@ -81,19 +81,19 @@ add_item = ()->
   $("#attr_value_is_multivalued").removeAttr("checked")
   $('#add_edit_item_label').text('Add Item')
   # $('#add_edit_item_attributes').modal('show')
-  
+
 edit_item = (domain, item, attr_name, attr_values)->
   $("#domain_select").val(domain)
   $("#item_name").val(item)
   $("#attr_name").val(attr_name)
   $("#attr_value_textarea").val(attr_values.join("\n")).attr("rows", Math.max(1,attr_values.length))
-  if(attr_values.length > 1) 
+  if(attr_values.length > 1)
     $("#attr_value_is_multivalued").attr("checked", "checked")
   else
     $("#attr_value_is_multivalued").removeAttr("checked")
   $('#add_edit_item_label').text('Edit Item')
-  $('#add_edit_item_attributes').modal('show')  
-  
+  $('#add_edit_item_attributes').modal('show')
+
 save_item = ()->
   domain_name = $("#domain_select").val()
   item_name = $("#item_name").val()
@@ -113,7 +113,7 @@ save_item = ()->
 enable_delete = ()->
   $("button[id^=delete_]").removeAttr("disabled").addClass("danger").removeClass("secondary")
   $("#domain_deletion_control").text("Disable Delete").addClass("danger").removeClass("secondary").addClass("active")
-  
+
 disable_delete = ()->
   $("button[id^=delete_]").attr("disabled", "disabled").addClass("secondary").removeClass("danger")
   $("#domain_deletion_control").text("Enable Delete").addClass("secondary").removeClass("danger").removeClass("active")
@@ -123,21 +123,21 @@ handle_delete_toggle = ()->
     disable_delete()
   else
     enable_delete()
-    
+
 domain_from_query = ()->
-  domain_match = $("#query_expr").val().match(/\`(.+)\`/) 
+  domain_match = $("#query_expr").val().match(/\`(.+)\`/)
   if(domain_match != null) then domain_match[1] else null
 
 handle_query = (results)->
   $("#message_box").hide()
   item_count = results.items.length
   next_token = results.next_token
-  if next_token?    
+  if next_token?
     next_token = next_token.replace(/\n/g, "") # replace newlines
     $("#next_page_btn").removeAttr("disabled").attr("onclick", "query('#{next_token}')")
   else
     $("#next_page_btn").attr("disabled", "disabled").removeAttr("onclick")
-  
+
   if item_count == 0
     $("#query_results_table > thead").html("<tr><th>Items</th></tr>")
     $("#query_results_table > tbody").html("<tr><td>No results...</td></tr>")
@@ -145,20 +145,20 @@ handle_query = (results)->
     ths = for attr_name in results.attr_names
       "<th>#{attr_name}</th>"
     trs = for item in results.items
-      tds = for attr_name in results.attr_names  
+      tds = for attr_name in results.attr_names
         attr_vals = item.attrs[attr_name]
         if attr_vals?
-          if attr_vals.length > 1  
+          if attr_vals.length > 1
             "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"true\"><table><tbody><tr><td>"+attr_vals.join("</td><td>")+"</td></tr></tbody></table></td>"
           else
             "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"false\">#{attr_vals.join('')}</td>"
-        else 
+        else
           "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"false\"></td>"
       "<tr data-item-name=\"#{item.name}\"><td>#{item.name}</td>#{tds.join("")}</tr>"
-    
+
     $("#query_results_table > thead").html("<tr><th>Item Name</th>#{ths.join('')}</tr>")
     $("#query_results_table > tbody").html(trs.join(""))
-    
+
     # add click listener
     $("#query_results_table > tbody > tr").each((index, val)->
       # for each td
@@ -166,8 +166,8 @@ handle_query = (results)->
         #skip 0 index since it is item name
         if(jindex > 0)
           id = "edit_image"
-          handler_in = ()->        
-            $(this).append(" <img id=\"#{id}\" src=\"images/attr_edit.png\"/>").click(()->
+          handler_in = ()->
+            $(this).append("<img class=\"edititem\" id=\"#{id}\" src=\"images/attr_edit.png\"/>").click(()->
               item_name = $(this).parent().attr("data-item-name")
               attr_name = $(this).attr("data-attr-name")
               is_multivalued = $(this).attr("data-attr-multivalued") == "true"
@@ -183,18 +183,18 @@ handle_query = (results)->
           handler_out = ()->
             $("#"+id).remove()
           $(tdval).hover(handler_in,handler_out)
-        
-      )   
-      
+
+      )
+
     )
   $("#query_btn").button('reset')
-      
-        
+
+
 query = (next_token=null)->
   query_expr = $("#query_expr").val()
   sdb.select(query_expr, handle_query, next_token)
   $("#query_btn").button('loading')
-  
+
 
 metadata = (domain)->
   sdb.domain_metadata(domain, (res)->
@@ -231,9 +231,9 @@ delete_domain = (domain)->
     update_domains_table(()->
       $("#confirm_delete_domain_btn").button('reset')
       disable_delete()
-    )    
-  )  
-  
+    )
+  )
+
 # handle modal buttons
 save_domain = ()->
   #TODO validate
@@ -243,5 +243,5 @@ save_domain = ()->
     update_domains_table(()->
       $("#save_domain").button('reset')
       $('#create_domain_modal').modal('hide')
-    )    
+    )
   )
