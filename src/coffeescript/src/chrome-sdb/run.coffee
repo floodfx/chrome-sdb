@@ -52,17 +52,22 @@ $(()->
   )
 )
 
-
 add_domains = (domains)->
-  if domains.length == 0
-    trs = ["<tr><td>No domains in this region</td></tr>"]
-  else
-    trs = for domain in domains
-      controls = "<button id=\"metadata_#{domain}\" class=\"btn info\" onclick=\"metadata('#{domain}')\">metadata</a>"
-      controls += " <button id=\"delete_#{domain}\" class=\"btn\" onclick=\"confirm_delete('#{domain}')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>"
-      "<tr><td>#{domain}<br />#{controls}</td></tr>"
-  $("#domains_table > tbody").html(trs.join(""))
-
+	if domains.length == 0
+		tr = "<tr><td>No domains in this region</td></tr>"
+		$("#domains_table > tbody").html(tr)
+	else
+		$("#domains_table > tbody").html('')
+		for domain in domains
+			btn_md = $("<button id=\"metadata_#{domain}\" class=\"btn info\">metadata</a>")
+			btn_md.click ()->
+				metadata(domain)
+			btn_del = $("<button id=\"delete_#{domain}\" class=\"btn\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>")
+			btn_del.click () ->
+				confirm_delete(domain)
+			td = $("<td>#{domain}<br /></td>").append(btn_md).append(btn_del)
+			tr = $("<tr></tr>").append(td)
+			$("#domains_table > tbody").append(tr)
   $("#domain_select > option").remove()
   for domain in domains
     $("#domain_select").append($('<option>', {value:domain}).text(domain))
@@ -137,7 +142,6 @@ handle_query = (results)->
     $("#next_page_btn").removeAttr("disabled").attr("onclick", "query('#{next_token}')")
   else
     $("#next_page_btn").attr("disabled", "disabled").removeAttr("onclick")
-
   if item_count == 0
     $("#query_results_table > thead").html("<tr><th>Items</th></tr>")
     $("#query_results_table > tbody").html("<tr><td>No results...</td></tr>")
@@ -155,7 +159,6 @@ handle_query = (results)->
         else
           "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"false\"></td>"
       "<tr data-item-name=\"#{item.name}\"><td>#{item.name}</td>#{tds.join("")}</tr>"
-
     $("#query_results_table > thead").html("<tr><th>Item Name</th>#{ths.join('')}</tr>")
     $("#query_results_table > tbody").html(trs.join(""))
 
@@ -183,7 +186,6 @@ handle_query = (results)->
           handler_out = ()->
             $("#"+id).remove()
           $(tdval).hover(handler_in,handler_out)
-
       )
 
     )
@@ -220,19 +222,19 @@ $(()->
 )
 
 confirm_delete = (domain)->
-  $("#domain_delete_label").html("<h2>Delete #{domain}?</h2>")
-  $("input[name=confirm_delete]").val("")
-  $("#confirm_delete_domain_btn").attr("onclick", "delete_domain('#{domain}')")
-  $("#confirm_delete_domain_modal").modal('show')
+	$("#domain_delete_label").html("<h2>Delete #{domain}?</h2>")
+	$("input[name=confirm_delete]").val("")
+	$("#confirm_delete_domain_modal").modal('show')
+	$("#confirm_delete_domain_btn").click ()->
+		delete_domain(domain)
 
 delete_domain = (domain)->
-  $("#confirm_delete_domain_btn").button('loading')
-  sdb.delete_domain(domain, (results)->
-    update_domains_table(()->
-      $("#confirm_delete_domain_btn").button('reset')
-      disable_delete()
-    )
-  )
+	$("#confirm_delete_domain_btn").button('loading')
+	sdb.delete_domain domain, (results)->
+		$("#confirm_delete_domain_btn").button('reset')
+		update_domains_table ()->
+			disable_delete()
+			$("#confirm_delete_domain_modal").modal('hide')
 
 # handle modal buttons
 save_domain = ()->
