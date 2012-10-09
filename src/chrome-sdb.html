@@ -48,7 +48,7 @@
         <div class='row'>
           <div class='span10 offset1' id='message_box' style='display:none;'>
             <div class='alert-message block-message error'>
-              <a class='close' href='#'>
+              <a class='msg_box_close close' href='#'>
                 x
               </a>
               <p>
@@ -74,7 +74,7 @@
                 </a>
               </p>
               <div class='alert-actions'>
-                <button class='btn small'>
+                <button class='msg_box_close btn small'>
                   Close
                 </button>
               </div>
@@ -246,7 +246,7 @@
           Save
         </button>
         <input class='btn' id='reset_attribute_btn' type='reset' />
-        <a href='#'>
+        <a href='#' id='reset_attribute_btn_cancel'>
           Cancel
         </a>
       </div>
@@ -278,7 +278,7 @@
         <button class='btn primary' data-loading-text='Saving domain...' id='save_domain'>
           Save
         </button>
-        <button class='btn secondary'>
+        <button class='btn secondary' id='save_domain_cancel'>
           Cancel
         </button>
       </div>
@@ -315,7 +315,7 @@
         <button class='btn warning' data-loading-text='Deleting...' disabled='disabled' id='confirm_delete_domain_btn'>
           Confirm Deletion
         </button>
-        <button class='btn secondary'>
+        <button class='btn secondary' id='confirm_delete_domain_cancel'>
           Cancel
         </button>
       </div>
@@ -386,7 +386,7 @@
         </form>
       </div>
       <div class='modal-footer'>
-        <a class='btn primary' href='#'>
+        <a class='btn primary' href='#' id='metadata_btn_ok'>
           Ok
         </a>
       </div>

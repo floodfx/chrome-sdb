@@ -39,7 +39,7 @@
         .row
           .span10.offset1#message_box(style="display:none;")
             .alert-message.block-message.error
-              %a.close(href="#")
+              %a.msg_box_close.close(href="#")
                 x
               %p
                 %strong
@@ -56,7 +56,7 @@
                 %a#error_url(href="" target="_new")
                   Request URL
               .alert-actions
-                %button.btn.small()
+                %button.msg_box_close.btn.small()
                   Close
 
 
@@ -170,7 +170,7 @@
         %button.btn.info#save_attribute_btn()
           Save
         %input.btn#reset_attribute_btn(type="reset")
-        %a(href="#")
+        %a#reset_attribute_btn_cancel(href="#")
           Cancel
 
     #create_domain_modal.modal.hide.fade(style="display: none;")
@@ -190,7 +190,7 @@
       .modal-footer
         %button#save_domain.btn.primary(data-loading-text="Saving domain...")
           Save
-        %button.btn.secondary()
+        %button#save_domain_cancel.btn.secondary()
           Cancel
 
     #confirm_delete_domain_modal.modal.hide.fade(style="display: none;")
@@ -214,7 +214,7 @@
       .modal-footer
         %button#confirm_delete_domain_btn.btn.warning(disabled="disabled" data-loading-text="Deleting...")
           Confirm Deletion
-        %button.btn.secondary()
+        %button#confirm_delete_domain_cancel.btn.secondary()
           Cancel
 
     #domain_metadata_modal.modal.hide.fade(style="display: none;")
@@ -258,5 +258,5 @@
               .input
                 %input.span2(name="attributeValuesSizeBytes" type="text" disabled="disabled")
       .modal-footer
-        %a.btn.primary(href="#")
+        %a#metadata_btn_ok.btn.primary(href="#")
           Ok
