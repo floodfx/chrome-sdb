@@ -134,18 +134,19 @@ domain_from_query = ()->
   if(domain_match != null) then domain_match[1] else null
 
 handle_query = (results)->
-  $("#message_box").hide()
-  item_count = results.items.length
-  next_token = results.next_token
-  if next_token?
-    next_token = next_token.replace(/\n/g, "") # replace newlines
-    $("#next_page_btn").removeAttr("disabled").attr("onclick", "query('#{next_token}')")
-  else
-    $("#next_page_btn").attr("disabled", "disabled").removeAttr("onclick")
-  if item_count == 0
-    $("#query_results_table > thead").html("<tr><th>Items</th></tr>")
-    $("#query_results_table > tbody").html("<tr><td>No results...</td></tr>")
-  else
+	$("#message_box").hide()
+	item_count = results.items.length
+	next_token = results.next_token
+	if next_token?
+		next_token = next_token.replace(/\n/g, "") # replace newlines
+		$("#next_page_btn").removeAttr("disabled").click ()->
+			query(next_token)
+	else
+		$("#next_page_btn").attr("disabled", "disabled").unbind("click")
+	if item_count == 0
+		$("#query_results_table > thead").html("<tr><th>Items</th></tr>")
+		$("#query_results_table > tbody").html("<tr><td>No results...</td></tr>")
+	else
     ths = for attr_name in results.attr_names
       "<th>#{attr_name}</th>"
     trs = for item in results.items
