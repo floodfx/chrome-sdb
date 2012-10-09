@@ -255,96 +255,6 @@ SHA1 = (function() {
     return rstr2any(rstr_hmac_sha1(str2rstr_utf8(k), str2rstr_utf8(d)), e);
   };
   return pub;
-})();var Storage;
-Storage = (function() {
-  var pub;
-  pub = {};
-  pub.get = function(key, is_json) {
-    var val;
-    if (is_json == null) {
-      is_json = false;
-    }
-    val = localStorage.getItem(key);
-    if (is_json) {
-      val = JSON.parse(val);
-    }
-    return val;
-  };
-  pub.set = function(key, val, is_json) {
-    if (is_json == null) {
-      is_json = false;
-    }
-    if (is_json) {
-      val = JSON.stringify(val);
-    }
-    localStorage.setItem(key, val);
-    return val;
-  };
-  pub.del = function(key) {
-    return localStorage.removeItem(key);
-  };
-  return pub;
-})();var Settings;
-Settings = (function() {
-  function Settings(access_key, secret_key, region, version, https_protocol) {
-    this.access_key = access_key;
-    this.secret_key = secret_key;
-    this.region = region != null ? region : "sdb.amazonaws.com";
-    this.version = version != null ? version : "2009-04-15";
-    this.https_protocol = https_protocol != null ? https_protocol : false;
-  }
-  Settings.prototype.use_access_key = function(access_key) {
-    this.access_key = access_key;
-    return this;
-  };
-  Settings.prototype.use_secret_key = function(secret_key) {
-    this.secret_key = secret_key;
-    return this;
-  };
-  Settings.prototype.use_region = function(region) {
-    this.region = region;
-    return this;
-  };
-  Settings.prototype.use_version = function(version) {
-    this.version = version;
-    return this;
-  };
-  Settings.prototype.use_https_protocol = function(true_or_false) {
-    this.https_protocol = true_or_false;
-    return this;
-  };
-  Settings.prototype.get_access_key = function() {
-    return this.access_key;
-  };
-  Settings.prototype.get_secret_key = function() {
-    return this.secret_key;
-  };
-  Settings.prototype.get_region = function() {
-    return this.region;
-  };
-  Settings.prototype.get_version = function() {
-    return this.version;
-  };
-  Settings.prototype.get_use_https = function() {
-    return this.https_protocol;
-  };
-  Settings.prototype.to_json = function() {
-    return {
-      access_key: this.access_key,
-      secret_key: this.secret_key,
-      region: this.region,
-      version: this.version,
-      https_protocol: this.https_protocol
-    };
-  };
-  Settings.from_json = function(json) {
-    if (json) {
-      return new Settings(json["access_key"], json["secret_key"], json["region"], json["version"], json["https_protocol"]);
-    } else {
-      return null;
-    }
-  };
-  return Settings;
 })();var AwsUtils;
 AwsUtils = (function() {
   var hhmmss, pub, sort_lower_case, yyyymmdd, zeropad;
@@ -797,6 +707,96 @@ SimpleDB = (function() {
     });
   };
   return SimpleDB;
+})();var Storage;
+Storage = (function() {
+  var pub;
+  pub = {};
+  pub.get = function(key, is_json) {
+    var val;
+    if (is_json == null) {
+      is_json = false;
+    }
+    val = localStorage.getItem(key);
+    if (is_json) {
+      val = JSON.parse(val);
+    }
+    return val;
+  };
+  pub.set = function(key, val, is_json) {
+    if (is_json == null) {
+      is_json = false;
+    }
+    if (is_json) {
+      val = JSON.stringify(val);
+    }
+    localStorage.setItem(key, val);
+    return val;
+  };
+  pub.del = function(key) {
+    return localStorage.removeItem(key);
+  };
+  return pub;
+})();var Settings;
+Settings = (function() {
+  function Settings(access_key, secret_key, region, version, https_protocol) {
+    this.access_key = access_key;
+    this.secret_key = secret_key;
+    this.region = region != null ? region : "sdb.amazonaws.com";
+    this.version = version != null ? version : "2009-04-15";
+    this.https_protocol = https_protocol != null ? https_protocol : false;
+  }
+  Settings.prototype.use_access_key = function(access_key) {
+    this.access_key = access_key;
+    return this;
+  };
+  Settings.prototype.use_secret_key = function(secret_key) {
+    this.secret_key = secret_key;
+    return this;
+  };
+  Settings.prototype.use_region = function(region) {
+    this.region = region;
+    return this;
+  };
+  Settings.prototype.use_version = function(version) {
+    this.version = version;
+    return this;
+  };
+  Settings.prototype.use_https_protocol = function(true_or_false) {
+    this.https_protocol = true_or_false;
+    return this;
+  };
+  Settings.prototype.get_access_key = function() {
+    return this.access_key;
+  };
+  Settings.prototype.get_secret_key = function() {
+    return this.secret_key;
+  };
+  Settings.prototype.get_region = function() {
+    return this.region;
+  };
+  Settings.prototype.get_version = function() {
+    return this.version;
+  };
+  Settings.prototype.get_use_https = function() {
+    return this.https_protocol;
+  };
+  Settings.prototype.to_json = function() {
+    return {
+      access_key: this.access_key,
+      secret_key: this.secret_key,
+      region: this.region,
+      version: this.version,
+      https_protocol: this.https_protocol
+    };
+  };
+  Settings.from_json = function(json) {
+    if (json) {
+      return new Settings(json["access_key"], json["secret_key"], json["region"], json["version"], json["https_protocol"]);
+    } else {
+      return null;
+    }
+  };
+  return Settings;
 })();var Profile;
 Profile = (function() {
   function Profile(name, settings) {
@@ -964,32 +964,36 @@ $(function() {
   });
 });
 add_domains = function(domains) {
-  var controls, domain, trs, _i, _len, _results;
+  var btn_del, btn_md, domain, td, tr, _i, _j, _len, _len2, _results;
   if (domains.length === 0) {
-    trs = ["<tr><td>No domains in this region</td></tr>"];
+    tr = "<tr><td>No domains in this region</td></tr>";
+    return $("#domains_table > tbody").html(tr);
   } else {
-    trs = (function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = domains.length; _i < _len; _i++) {
-        domain = domains[_i];
-        controls = "<button id=\"metadata_" + domain + "\" class=\"btn info\" onclick=\"metadata('" + domain + "')\">metadata</a>";
-        controls += " <button id=\"delete_" + domain + "\" class=\"btn\" onclick=\"confirm_delete('" + domain + "')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>";
-        _results.push("<tr><td>" + domain + "<br />" + controls + "</td></tr>");
-      }
-      return _results;
-    })();
+    $("#domains_table > tbody").html('');
+    for (_i = 0, _len = domains.length; _i < _len; _i++) {
+      domain = domains[_i];
+      btn_md = $("<button id=\"metadata_" + domain + "\" class=\"btn info\">metadata</a>");
+      btn_md.click(function() {
+        return metadata(domain);
+      });
+      btn_del = $("<button id=\"delete_" + domain + "\" class=\"btn\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>");
+      btn_del.click(function() {
+        return confirm_delete(domain);
+      });
+      td = $("<td>" + domain + "<br /></td>").append(btn_md).append(btn_del);
+      tr = $("<tr></tr>").append(td);
+      $("#domains_table > tbody").append(tr);
+    }
+    $("#domain_select > option").remove();
+    _results = [];
+    for (_j = 0, _len2 = domains.length; _j < _len2; _j++) {
+      domain = domains[_j];
+      _results.push($("#domain_select").append($('<option>', {
+        value: domain
+      }).text(domain)));
+    }
+    return _results;
   }
-  $("#domains_table > tbody").html(trs.join(""));
-  $("#domain_select > option").remove();
-  _results = [];
-  for (_i = 0, _len = domains.length; _i < _len; _i++) {
-    domain = domains[_i];
-    _results.push($("#domain_select").append($('<option>', {
-      value: domain
-    }).text(domain)));
-  }
-  return _results;
 };
 update_domains_table = function(callback) {
   if (callback == null) {
@@ -1078,9 +1082,11 @@ handle_query = function(results) {
   next_token = results.next_token;
   if (next_token != null) {
     next_token = next_token.replace(/\n/g, "");
-    $("#next_page_btn").removeAttr("disabled").attr("onclick", "query('" + next_token + "')");
+    $("#next_page_btn").removeAttr("disabled").click(function() {
+      return query(next_token);
+    });
   } else {
-    $("#next_page_btn").attr("disabled", "disabled").removeAttr("onclick");
+    $("#next_page_btn").attr("disabled", "disabled").unbind("click");
   }
   if (item_count === 0) {
     $("#query_results_table > thead").html("<tr><th>Items</th></tr>");
@@ -1125,7 +1131,7 @@ handle_query = function(results) {
         if (jindex > 0) {
           id = "edit_image";
           handler_in = function() {
-            return $(this).append(" <img id=\"" + id + "\" src=\"images/attr_edit.png\"/>").click(function() {
+            return $(this).append("<img class=\"edititem\" id=\"" + id + "\" src=\"images/attr_edit.png\"/>").click(function() {
               var is_multivalued, item_name, values;
               item_name = $(this).parent().attr("data-item-name");
               attr_name = $(this).attr("data-attr-name");
@@ -1184,15 +1190,18 @@ $(function() {
 confirm_delete = function(domain) {
   $("#domain_delete_label").html("<h2>Delete " + domain + "?</h2>");
   $("input[name=confirm_delete]").val("");
-  $("#confirm_delete_domain_btn").attr("onclick", "delete_domain('" + domain + "')");
-  return $("#confirm_delete_domain_modal").modal('show');
+  $("#confirm_delete_domain_modal").modal('show');
+  return $("#confirm_delete_domain_btn").click(function() {
+    return delete_domain(domain);
+  });
 };
 delete_domain = function(domain) {
   $("#confirm_delete_domain_btn").button('loading');
   return sdb.delete_domain(domain, function(results) {
+    $("#confirm_delete_domain_btn").button('reset');
     return update_domains_table(function() {
-      $("#confirm_delete_domain_btn").button('reset');
-      return disable_delete();
+      disable_delete();
+      return $("#confirm_delete_domain_modal").modal('hide');
     });
   });
 };

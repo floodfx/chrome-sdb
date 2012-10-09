@@ -19,7 +19,36 @@ $(function() {
       title: "Chrome Simple DB Tool: Configuration"
     }).show();
   }
-});var Settings;
+});var Storage;
+Storage = (function() {
+  var pub;
+  pub = {};
+  pub.get = function(key, is_json) {
+    var val;
+    if (is_json == null) {
+      is_json = false;
+    }
+    val = localStorage.getItem(key);
+    if (is_json) {
+      val = JSON.parse(val);
+    }
+    return val;
+  };
+  pub.set = function(key, val, is_json) {
+    if (is_json == null) {
+      is_json = false;
+    }
+    if (is_json) {
+      val = JSON.stringify(val);
+    }
+    localStorage.setItem(key, val);
+    return val;
+  };
+  pub.del = function(key) {
+    return localStorage.removeItem(key);
+  };
+  return pub;
+})();var Settings;
 Settings = (function() {
   function Settings(access_key, secret_key, region, version, https_protocol) {
     this.access_key = access_key;
@@ -80,35 +109,6 @@ Settings = (function() {
     }
   };
   return Settings;
-})();var Storage;
-Storage = (function() {
-  var pub;
-  pub = {};
-  pub.get = function(key, is_json) {
-    var val;
-    if (is_json == null) {
-      is_json = false;
-    }
-    val = localStorage.getItem(key);
-    if (is_json) {
-      val = JSON.parse(val);
-    }
-    return val;
-  };
-  pub.set = function(key, val, is_json) {
-    if (is_json == null) {
-      is_json = false;
-    }
-    if (is_json) {
-      val = JSON.stringify(val);
-    }
-    localStorage.setItem(key, val);
-    return val;
-  };
-  pub.del = function(key) {
-    return localStorage.removeItem(key);
-  };
-  return pub;
 })();var Profile;
 Profile = (function() {
   function Profile(name, settings) {
