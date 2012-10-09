@@ -154,7 +154,7 @@ handle_query = (results)->
         attr_vals = item.attrs[attr_name]
         if attr_vals?
           if attr_vals.length > 1
-            "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"true\"><table><tbody><tr><td>"+attr_vals.join("</td><td>")+"</td></tr></tbody></table></td>"
+            "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"true\"><table class=\"multivalued\"><tbody><tr><td>"+attr_vals.join("</td></tr><tr><td>")+"</td></tr></tbody></table></td>"
           else
             "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"false\">#{attr_vals.join('')}</td>"
         else
@@ -162,16 +162,15 @@ handle_query = (results)->
       "<tr data-item-name=\"#{item.name}\"><td>#{item.name}</td>#{tds.join("")}</tr>"
     $("#query_results_table > thead").html("<tr><th>Item Name</th>#{ths.join('')}</tr>")
     $("#query_results_table > tbody").html(trs.join(""))
-
+    
     # add click listener
     $("#query_results_table > tbody > tr").each((index, val)->
       # for each td
       $(val).children("td").each((jindex, tdval)->
         #skip 0 index since it is item name
         if(jindex > 0)
-          id = "edit_image"
           handler_in = ()->
-            $(this).append("<img class=\"edititem\" id=\"#{id}\" src=\"images/attr_edit.png\"/>").click(()->
+            $(this).addClass("edititem").dblclick(()->
               item_name = $(this).parent().attr("data-item-name")
               attr_name = $(this).attr("data-attr-name")
               is_multivalued = $(this).attr("data-attr-multivalued") == "true"
@@ -185,7 +184,7 @@ handle_query = (results)->
               edit_item(domain_from_query(), item_name, attr_name, values)
             )
           handler_out = ()->
-            $("#"+id).remove()
+            $(this).removeClass('edititem')
           $(tdval).hover(handler_in,handler_out)
       )
 

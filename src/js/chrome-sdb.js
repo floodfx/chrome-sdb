@@ -1115,7 +1115,7 @@ handle_query = function(results) {
           for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
             attr_name = _ref2[_j];
             attr_vals = item.attrs[attr_name];
-            _results2.push(attr_vals != null ? attr_vals.length > 1 ? ("<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"true\"><table><tbody><tr><td>") + attr_vals.join("</td><td>") + "</td></tr></tbody></table></td>" : "<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"false\">" + (attr_vals.join('')) + "</td>" : "<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"false\"></td>");
+            _results2.push(attr_vals != null ? attr_vals.length > 1 ? ("<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"true\"><table class=\"multivalued\"><tbody><tr><td>") + attr_vals.join("</td></tr><tr><td>") + "</td></tr></tbody></table></td>" : "<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"false\">" + (attr_vals.join('')) + "</td>" : "<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"false\"></td>");
           }
           return _results2;
         })();
@@ -1127,11 +1127,10 @@ handle_query = function(results) {
     $("#query_results_table > tbody").html(trs.join(""));
     $("#query_results_table > tbody > tr").each(function(index, val) {
       return $(val).children("td").each(function(jindex, tdval) {
-        var handler_in, handler_out, id;
+        var handler_in, handler_out;
         if (jindex > 0) {
-          id = "edit_image";
           handler_in = function() {
-            return $(this).append("<img class=\"edititem\" id=\"" + id + "\" src=\"images/attr_edit.png\"/>").click(function() {
+            return $(this).addClass("edititem").dblclick(function() {
               var is_multivalued, item_name, values;
               item_name = $(this).parent().attr("data-item-name");
               attr_name = $(this).attr("data-attr-name");
@@ -1148,7 +1147,7 @@ handle_query = function(results) {
             });
           };
           handler_out = function() {
-            return $("#" + id).remove();
+            return $(this).removeClass('edititem');
           };
           return $(tdval).hover(handler_in, handler_out);
         }

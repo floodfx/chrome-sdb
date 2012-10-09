@@ -22,3 +22,19 @@ form .clearfix2:after {
 img.edititem {
   margin-left: 5px;
 }
+
+table.multivalued tr td {
+  border: 0;
+}
+table.multivalued tr {
+  border-bottom: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+table.multivalued tr:first-child {
+  border-top: 1px solid #ddd;
+}
+
+td.edititem {
+  background-color: #e7e7ff;
+}
