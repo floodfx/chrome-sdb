@@ -952,15 +952,43 @@ $(function() {
     }).text(region["name"]));
   }
   $("#region_select").val(profile.get_settings().get_region());
-  return $("#region_select").change(function() {
+  $("#region_select").change(function() {
     region = $("#region_select").val();
     return update_region(region);
   });
-});
-$(function() {
   $("#domain_table_div").height($(window).height() - 200);
-  return $(window).resize(function() {
+  $(window).resize(function() {
     return $("#domain_table_div").height($(this).height() - 200);
+  });
+  $('#query_btn').click(function() {
+    return query();
+  });
+  $('#add_item').click(function() {
+    return add_item();
+  });
+  $('#domain_deletion_control').click(function() {
+    return handle_delete_toggle();
+  });
+  $('#save_attribute_btn').click(function() {
+    return save_item();
+  });
+  $('#save_domain').click(function() {
+    return save_domain();
+  });
+  $('#save_domain_cancel').click(function() {
+    return $('#create_domain_modal').modal('hide');
+  });
+  $('#reset_attribute_btn_cancel').click(function() {
+    return $('#add_edit_item_attributes').modal('hide');
+  });
+  $('#confirm_delete_domain_btn_cancel').click(function() {
+    return $('#confirm_delete_domain_modal').modal('hide');
+  });
+  $('#metadata_btn_ok').click(function() {
+    return $('#domain_metadata_modal').modal('hide');
+  });
+  return $('.msg_box_close').click(function() {
+    return $('#message_box').hide();
   });
 });
 add_domains = function(domains) {

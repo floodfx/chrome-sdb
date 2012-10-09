@@ -1,7 +1,7 @@
 {
   "name" : "Simple DB Tool for Chrome",
   "description" : "Tool for Amazon Web Services Simple DB",
-  "version" : "0.0.1",
+  "version" : "0.0.2",
   "app": {
     "launch": {
       "local_path": "chrome-sdb.html",
@@ -12,8 +12,8 @@
     "*://*.amazonaws.com/",
     "tabs"
   ],
-  //"manifest_version": 1,
-  //"content_security_policy": "script-src 'self' 'unsafe-eval' https://*.amazonaws.com; object-src 'self'",
+  "manifest_version": 2,
+  "content_security_policy": "script-src 'self' 'unsafe-eval' https://*.amazonaws.com; object-src 'self'",
   "icons" : {
     "16" : "images/chrome-sdb-tool-16.png",
     "128" : "images/chrome-sdb-tool-128.png"

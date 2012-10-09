@@ -33,8 +33,8 @@ update_region = (region)->
   sdb = new SimpleDB(profile, false, handle_error)
   update_domains_table()
 
-# set region options
 $(()->
+  # set region options
   for region in SimpleDB.regions()
     $("#region_select").append($('<option>', { value:region["endpoint"] }).text(region["name"]))
   $("#region_select").val(profile.get_settings().get_region())
@@ -42,14 +42,42 @@ $(()->
     region = $("#region_select").val()
     update_region(region)
   )
-)
 
-# keep domains table height optimal
-$(()->
+  # keep domains table height optimal
   $("#domain_table_div").height($(window).height()-200)
   $(window).resize(()->
     $("#domain_table_div").height($(this).height()-200)
   )
+
+  $('#query_btn').click ()->
+    query()
+
+  $('#add_item').click ()->
+    add_item()
+
+  $('#domain_deletion_control').click ()->
+    handle_delete_toggle()
+
+  $('#save_attribute_btn').click ()->
+    save_item()
+
+  $('#save_domain').click ()->
+    save_domain()
+
+  $('#save_domain_cancel').click ()->
+    $('#create_domain_modal').modal('hide')
+  
+  $('#reset_attribute_btn_cancel').click ()->
+    $('#add_edit_item_attributes').modal('hide')
+
+  $('#confirm_delete_domain_btn_cancel').click ()->
+    $('#confirm_delete_domain_modal').modal('hide')
+
+  $('#metadata_btn_ok').click ()->
+    $('#domain_metadata_modal').modal('hide')
+
+  $('.msg_box_close').click ()->
+    $('#message_box').hide()
 )
 
 add_domains = (domains)->

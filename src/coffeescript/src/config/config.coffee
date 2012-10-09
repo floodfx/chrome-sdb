@@ -89,3 +89,10 @@ use_profile = (profile_name)->
   update_profiles_table()
 
 
+$(()->
+	$('#save_profile').click ()->
+		save_profile()
+
+	$('#cancel_profile').click ()->
+		cancel_profile()
+)

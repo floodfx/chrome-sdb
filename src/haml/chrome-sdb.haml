@@ -44,7 +44,7 @@
         .row
           .span10.offset1#message_box(style="display:none;")
             .alert-message.block-message.error
-              %a.close(href="#" onclick="$('#message_box').hide()")
+              %a.close(href="#")
                 x
               %p
                 %strong
@@ -61,7 +61,7 @@
                 %a#error_url(href="" target="_new")
                   Request URL
               .alert-actions
-                %button.btn.small(onclick="$('#message_box').hide()")
+                %button.btn.small()
                   Close
 
 
@@ -70,7 +70,7 @@
             .clearfix
               %h3(for="query")
                 Query
-                %input.btn.primary.pull-right#query_btn(type="button" value="Run Query" onclick="query()" data-loading-text="Running query...")
+                %input.btn.primary.pull-right#query_btn(type="button" value="Run Query" data-loading-text="Running query...")
               .input
                 %textarea.span8#query_expr{:name => "query", :rows => 3}
                 %span.help-block
@@ -101,7 +101,7 @@
           .span15.offset1
             %footer.actions
               %span.brandfont
-                Simple DB Tool v0.1
+                Simple DB Tool v0.2
               |
               %a(href="https://github.com/floodfx/chrome-sdb/issues")
                 Feedback / Bugs / Feature requests?
@@ -111,7 +111,7 @@
         .row(style="width:250px")
           %h3
             Domains
-            %button.btn.info.pull-right#add_item(data-controls-modal="add_edit_item_attributes" data-backdrop="static" onclick="add_item()")
+            %button.btn.info.pull-right#add_item(data-controls-modal="add_edit_item_attributes" data-backdrop="static")
               Add Item
           %select#region_select(name="region" style="width:250px")
           .overflow#domain_table_div(style="width: 250px; overflow:auto; margin-bottom:10px;margin-top:10px")
@@ -123,7 +123,7 @@
         .row(style="width:250px;margin-bottom:20px")
           %a.btn.primary#create_domain(href="#" data-controls-modal="create_domain_modal" data-backdrop="static")
             Create Domain
-          %button.btn.warning.pull-right#domain_deletion_control(onclick="handle_delete_toggle()")
+          %button.btn.warning.pull-right#domain_deletion_control()
             Enable Delete
 
 
@@ -172,10 +172,10 @@
                   Multi-valued Delim (RegExp)
                 %input.span1#attr_value_delimiter(name="attr_value_delimiter" type="text" value="\\n" style="margin-left:10px")
       .modal-footer
-        %button.btn.info#save_attribute_btn(onclick="save_item()")
+        %button.btn.info#save_attribute_btn()
           Save
         %input.btn#reset_attribute_btn(type="reset")
-        %a(href="#" onclick="$('#add_edit_item_attributes').modal('hide')")
+        %a(href="#")
           Cancel
 
     #create_domain_modal.modal.hide.fade(style="display: none;")
@@ -193,9 +193,9 @@
               .input
                 %input#domain_name(name="name" size="100" type="text")
       .modal-footer
-        %button#save_domain.btn.primary(onclick="save_domain()" data-loading-text="Saving domain...")
+        %button#save_domain.btn.primary(data-loading-text="Saving domain...")
           Save
-        %button.btn.secondary(onclick="$('#create_domain_modal').modal('hide')")
+        %button.btn.secondary()
           Cancel
 
     #confirm_delete_domain_modal.modal.hide.fade(style="display: none;")
@@ -219,7 +219,7 @@
       .modal-footer
         %button#confirm_delete_domain_btn.btn.warning(disabled="disabled" data-loading-text="Deleting...")
           Confirm Deletion
-        %button.btn.secondary(onclick="$('#confirm_delete_domain_modal').modal('hide')")
+        %button.btn.secondary()
           Cancel
 
     #domain_metadata_modal.modal.hide.fade(style="display: none;")
@@ -263,5 +263,5 @@
               .input
                 %input.span2(name="attributeValuesSizeBytes" type="text" disabled="disabled")
       .modal-footer
-        %a.btn.primary(href="#" onclick="$('#domain_metadata_modal').modal('hide')")
+        %a.btn.primary(href="#")
           Ok

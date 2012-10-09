@@ -317,3 +317,11 @@ use_profile = function(profile_name) {
   profile.make_primary();
   return update_profiles_table();
 };
+$(function() {
+  $('#save_profile').click(function() {
+    return save_profile();
+  });
+  return $('#cancel_profile').click(function() {
+    return cancel_profile();
+  });
+});

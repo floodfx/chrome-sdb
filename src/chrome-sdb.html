@@ -53,7 +53,7 @@
         <div class='row'>
           <div class='span10 offset1' id='message_box' style='display:none;'>
             <div class='alert-message block-message error'>
-              <a class='close' href='#' onclick="$('#message_box').hide()">
+              <a class='close' href='#'>
                 x
               </a>
               <p>
@@ -79,7 +79,7 @@
                 </a>
               </p>
               <div class='alert-actions'>
-                <button class='btn small' onclick="$('#message_box').hide()">
+                <button class='btn small'>
                   Close
                 </button>
               </div>
@@ -91,7 +91,7 @@
             <div class='clearfix'>
               <h3 for='query'>
                 Query
-                <input class='btn primary pull-right' data-loading-text='Running query...' id='query_btn' onclick='query()' type='button' value='Run Query' />
+                <input class='btn primary pull-right' data-loading-text='Running query...' id='query_btn' type='button' value='Run Query' />
               </h3>
               <div class='input'>
                 <textarea class='span8' id='query_expr' name='query' rows='3'></textarea>
@@ -136,7 +136,7 @@
           <div class='span15 offset1'>
             <footer class='actions'>
               <span class='brandfont'>
-                Simple DB Tool v0.1
+                Simple DB Tool v0.2
               </span>
               |
               <a href='https://github.com/floodfx/chrome-sdb/issues'>
@@ -150,7 +150,7 @@
         <div class='row' style='width:250px'>
           <h3>
             Domains
-            <button class='btn info pull-right' data-backdrop='static' data-controls-modal='add_edit_item_attributes' id='add_item' onclick='add_item()'>
+            <button class='btn info pull-right' data-backdrop='static' data-controls-modal='add_edit_item_attributes' id='add_item'>
               Add Item
             </button>
           </h3>
@@ -171,7 +171,7 @@
           <a class='btn primary' data-backdrop='static' data-controls-modal='create_domain_modal' href='#' id='create_domain'>
             Create Domain
           </a>
-          <button class='btn warning pull-right' id='domain_deletion_control' onclick='handle_delete_toggle()'>
+          <button class='btn warning pull-right' id='domain_deletion_control'>
             Enable Delete
           </button>
         </div>
@@ -247,11 +247,11 @@
         </form>
       </div>
       <div class='modal-footer'>
-        <button class='btn info' id='save_attribute_btn' onclick='save_item()'>
+        <button class='btn info' id='save_attribute_btn'>
           Save
         </button>
         <input class='btn' id='reset_attribute_btn' type='reset' />
-        <a href='#' onclick="$('#add_edit_item_attributes').modal('hide')">
+        <a href='#'>
           Cancel
         </a>
       </div>
@@ -280,10 +280,10 @@
         </form>
       </div>
       <div class='modal-footer'>
-        <button class='btn primary' data-loading-text='Saving domain...' id='save_domain' onclick='save_domain()'>
+        <button class='btn primary' data-loading-text='Saving domain...' id='save_domain'>
           Save
         </button>
-        <button class='btn secondary' onclick="$('#create_domain_modal').modal('hide')">
+        <button class='btn secondary'>
           Cancel
         </button>
       </div>
@@ -320,7 +320,7 @@
         <button class='btn warning' data-loading-text='Deleting...' disabled='disabled' id='confirm_delete_domain_btn'>
           Confirm Deletion
         </button>
-        <button class='btn secondary' onclick="$('#confirm_delete_domain_modal').modal('hide')">
+        <button class='btn secondary'>
           Cancel
         </button>
       </div>
@@ -391,7 +391,7 @@
         </form>
       </div>
       <div class='modal-footer'>
-        <a class='btn primary' href='#' onclick="$('#domain_metadata_modal').modal('hide')">
+        <a class='btn primary' href='#'>
           Ok
         </a>
       </div>
