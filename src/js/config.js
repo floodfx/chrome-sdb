@@ -244,25 +244,38 @@ if (Profile.find_all() === []) {
   });
 }
 update_profiles_table = function() {
-  var access_key, del, edit, name, primary_name, profile, trs, use;
+  var access_key, del, delTd, edit, editTd, name, primary_name, profile, tr, use, useTd, _i, _len, _ref, _results;
   primary = Profile.primary();
   profiles = Profile.find_all();
-  trs = (function() {
-    var _i, _len, _ref, _results;
-    _results = [];
-    for (_i = 0, _len = profiles.length; _i < _len; _i++) {
-      profile = profiles[_i];
-      name = profile.get_name();
-      primary_name = (_ref = primary != null ? primary.get_name() : void 0) != null ? _ref : null;
-      access_key = profile.get_settings().get_access_key();
-      use = profile.get_name() === primary_name ? "In use" : "<a class=\"btn\" href=\"#\" onclick=\"use_profile('" + name + "')\">Use</a>";
-      edit = "<a href=\"#\" onclick=\"edit_profile('" + name + "')\">Edit</a>";
-      del = "<a href=\"#\" onclick=\"delete_profile('" + name + "')\">Delete</a>";
-      _results.push("<tr><td>" + name + "</td><td>" + access_key + "</td><td>" + edit + "</td><td>" + use + "</td><td>" + del + "</td></tr>");
+  if (profiles.length > 0) {
+    $("#profiles_table > tbody").html('');
+  }
+  _results = [];
+  for (_i = 0, _len = profiles.length; _i < _len; _i++) {
+    profile = profiles[_i];
+    name = profile.get_name();
+    primary_name = (_ref = primary != null ? primary.get_name() : void 0) != null ? _ref : null;
+    access_key = profile.get_settings().get_access_key();
+    if (name === primary_name) {
+      use = "In use";
+    } else {
+      use = $("<a class=\"btn\" name=\"" + name + "\" href=\"#\">Use</a>").click(function() {
+        return use_profile($(this).attr('name'));
+      });
     }
-    return _results;
-  })();
-  return $("#profiles_table > tbody").html(trs.join(""));
+    edit = $("<a href=\"#\" name=\"" + name + "\">Edit</a>").click(function() {
+      return edit_profile($(this).attr('name'));
+    });
+    del = $("<a href=\"#\" name=\"" + name + "\">Delete</a>").click(function() {
+      return delete_profile($(this).attr('name'));
+    });
+    editTd = $('<td></td>').append(edit);
+    useTd = $('<td></td>').append(use);
+    delTd = $('<td></td>').append(del);
+    tr = $("<tr><td>" + name + "</td><td>" + access_key + "</td></tr>").append(editTd).append(useTd).append(delTd);
+    _results.push($("#profiles_table > tbody").append(tr));
+  }
+  return _results;
 };
 save_profile = function() {
   var access_key, name, secret_key, valid;

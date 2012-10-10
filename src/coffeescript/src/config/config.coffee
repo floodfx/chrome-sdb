@@ -27,19 +27,29 @@ else
 
 
 update_profiles_table = ()->
-  primary = Profile.primary()
-  profiles = Profile.find_all()
-  trs = for profile in profiles
-    name = profile.get_name()
-    primary_name = primary?.get_name() ? null
-    access_key = profile.get_settings().get_access_key()
-    use = if(profile.get_name() == primary_name) then "In use" else "<a class=\"btn\" href=\"#\" onclick=\"use_profile('#{name}')\">Use</a>"
-    edit = "<a href=\"#\" onclick=\"edit_profile('#{name}')\">Edit</a>"
-    del = "<a href=\"#\" onclick=\"delete_profile('#{name}')\">Delete</a>"
-    "<tr><td>#{name}</td><td>#{access_key}</td><td>#{edit}</td><td>#{use}</td><td>#{del}</td></tr>"
-  $("#profiles_table > tbody").html(trs.join(""))
+	primary = Profile.primary()
+	profiles = Profile.find_all()
+	if(profiles.length > 0)
+		$("#profiles_table > tbody").html('')
+	for profile in profiles
+		name = profile.get_name()
+		primary_name = primary?.get_name() ? null
+		access_key = profile.get_settings().get_access_key()
+		if(name == primary_name)
+			use = "In use"
+		else
+			use = $("<a class=\"btn\" name=\"" + name + "\" href=\"#\">Use</a>").click ()->
+				use_profile($(this).attr('name'))
+		edit = $("<a href=\"#\" name=\"" + name + "\">Edit</a>").click ()->
+			edit_profile($(this).attr('name'))
+		del = $("<a href=\"#\" name=\"" + name + "\">Delete</a>").click ()->
+			delete_profile($(this).attr('name'))
+		editTd = $('<td></td>').append(edit)
+		useTd = $('<td></td>').append(use)
+		delTd = $('<td></td>').append(del)
+		tr = $("<tr><td>#{name}</td><td>#{access_key}</td></tr>").append(editTd).append(useTd).append(delTd)
+		$("#profiles_table > tbody").append(tr)
   
-
 # handle modal buttons
 save_profile = ()->
   valid = true
