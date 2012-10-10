@@ -915,7 +915,7 @@ Profile = (function() {
     return Storage.set("chrome-sdb.profiles", Profile.profiles_json(new_profiles), true);
   };
   return Profile;
-})();var add_domains, add_item, confirm_delete, delete_domain, disable_delete, domain_from_query, edit_item, enable_delete, handle_delete_toggle, handle_error, handle_query, metadata, profile, query, save_domain, save_item, sdb, update_domains_table, update_region;
+})();var add_domains, add_item, confirm_delete, confirm_delete_item, delete_domain, delete_item, disable_delete, domain_from_query, edit_item, enable_delete, handle_delete_toggle, handle_error, handle_query, metadata, profile, query, save_domain, save_item, sdb, update_domains_table, update_region;
 profile = Profile.primary();
 handle_error = function(results, xmldoc) {
   var error_code, error_msg, url;
@@ -987,8 +987,21 @@ $(function() {
   $('#metadata_btn_ok').click(function() {
     return $('#domain_metadata_modal').modal('hide');
   });
-  return $('.msg_box_close').click(function() {
+  $('.msg_box_close').click(function() {
     return $('#message_box').hide();
+  });
+  $('#delete_item_btn_yes').click(function() {
+    return delete_item();
+  });
+  $('#delete_item_btn_cancel').click(function() {
+    return $('#item_delete_modal').hide();
+  });
+  return $("input[name=confirm_delete]").keydown(function(key) {
+    if ($("input[name=confirm_delete]").val() === "DELET" && key.keyCode === 69) {
+      return $("#confirm_delete_domain_btn").removeAttr("disabled").addClass("danger").removeClass("secondary");
+    } else {
+      return $("#confirm_delete_domain_btn").attr("disabled", "disabled").addClass("secondary").removeClass("danger");
+    }
   });
 });
 add_domains = function(domains) {
@@ -1104,7 +1117,7 @@ domain_from_query = function() {
   }
 };
 handle_query = function(results) {
-  var attr_name, attr_vals, item, item_count, next_token, tds, ths, trs;
+  var attr_name, attr_vals, delTd, item, item_count, next_token, tds, ths, tr, _i, _len, _ref;
   $("#message_box").hide();
   item_count = results.items.length;
   next_token = results.next_token;
@@ -1130,33 +1143,32 @@ handle_query = function(results) {
       }
       return _results;
     })();
-    trs = (function() {
-      var _i, _len, _ref, _results;
-      _ref = results.items;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        item = _ref[_i];
-        tds = (function() {
-          var _j, _len2, _ref2, _results2;
-          _ref2 = results.attr_names;
-          _results2 = [];
-          for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-            attr_name = _ref2[_j];
-            attr_vals = item.attrs[attr_name];
-            _results2.push(attr_vals != null ? attr_vals.length > 1 ? ("<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"true\"><table class=\"multivalued\"><tbody><tr><td>") + attr_vals.join("</td></tr><tr><td>") + "</td></tr></tbody></table></td>" : "<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"false\">" + (attr_vals.join('')) + "</td>" : "<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"false\"></td>");
-          }
-          return _results2;
-        })();
-        _results.push("<tr data-item-name=\"" + item.name + "\"><td>" + item.name + "</td>" + (tds.join("")) + "</tr>");
-      }
-      return _results;
-    })();
-    $("#query_results_table > thead").html("<tr><th>Item Name</th>" + (ths.join('')) + "</tr>");
-    $("#query_results_table > tbody").html(trs.join(""));
+    $("#query_results_table > thead").html("<tr><th></th><th>Item Name</th>" + (ths.join('')) + "</tr>");
+    $("#query_results_table > tbody").html('');
+    _ref = results.items;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      item = _ref[_i];
+      tds = (function() {
+        var _j, _len2, _ref2, _results;
+        _ref2 = results.attr_names;
+        _results = [];
+        for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+          attr_name = _ref2[_j];
+          attr_vals = item.attrs[attr_name];
+          _results.push(attr_vals != null ? attr_vals.length > 1 ? ("<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"true\"><table class=\"multivalued\"><tbody><tr><td>") + attr_vals.join("</td></tr><tr><td>") + "</td></tr></tbody></table></td>" : "<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"false\">" + (attr_vals.join('')) + "</td>" : "<td data-attr-name=\"" + attr_name + "\" data-attr-multivalued=\"false\"></td>");
+        }
+        return _results;
+      })();
+      delTd = $('<td class="delete">x</td>').click(function() {
+        return confirm_delete_item($(this).closest('tr').attr('data-item-name'));
+      });
+      tr = $('<tr></tr>').attr('data-item-name', item.name).append(delTd).append('<td>' + item.name + '</td>').append(tds.join(''));
+      $("#query_results_table > tbody").append(tr);
+    }
     $("#query_results_table > tbody > tr").each(function(index, val) {
       return $(val).children("td").each(function(jindex, tdval) {
         var handler_in, handler_out;
-        if (jindex > 0) {
+        if (jindex > 1) {
           handler_in = function() {
             return $(this).addClass("edititem").dblclick(function() {
               var is_multivalued, item_name, values;
@@ -1205,15 +1217,20 @@ metadata = function(domain) {
     return $('#domain_metadata_modal').modal('show');
   });
 };
-$(function() {
-  return $("input[name=confirm_delete]").keydown(function(key) {
-    if ($("input[name=confirm_delete]").val() === "DELET" && key.keyCode === 69) {
-      return $("#confirm_delete_domain_btn").removeAttr("disabled").addClass("danger").removeClass("secondary");
-    } else {
-      return $("#confirm_delete_domain_btn").attr("disabled", "disabled").addClass("secondary").removeClass("danger");
-    }
+confirm_delete_item = function(name) {
+  $('#item_delete_modal').find('input[name="domain_name"]').val(domain_from_query());
+  $('#item_delete_modal').find('input[name="item_name"]').val(name);
+  return $('#item_delete_modal').modal('show');
+};
+delete_item = function() {
+  var domain, name;
+  domain = $('#item_delete_modal').find('input[name="domain_name"]').val();
+  name = $('#item_delete_modal').find('input[name="item_name"]').val();
+  return sdb.delete_attributes(domain, name, {}, function(res) {
+    $('#query_results_table').find('*[data-item-name="' + name + '"]').remove();
+    return $('#item_delete_modal').hide();
   });
-});
+};
 confirm_delete = function(domain) {
   $("#domain_delete_label").html("<h2>Delete " + domain + "?</h2>");
   $("input[name=confirm_delete]").val("");

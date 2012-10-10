@@ -78,6 +78,21 @@ $(()->
 
   $('.msg_box_close').click ()->
     $('#message_box').hide()
+
+  $('#delete_item_btn_yes').click ()->
+    delete_item()
+
+  $('#delete_item_btn_cancel').click ()->
+    $('#item_delete_modal').hide();
+
+  # watch for confirm deletion and enable delete button
+  $("input[name=confirm_delete]").keydown((key)->
+    # DELET + E
+    if($("input[name=confirm_delete]").val() == "DELET" && key.keyCode == 69)
+      $("#confirm_delete_domain_btn").removeAttr("disabled").addClass("danger").removeClass("secondary")
+    else
+      $("#confirm_delete_domain_btn").attr("disabled", "disabled").addClass("secondary").removeClass("danger")
+  )
 )
 
 add_domains = (domains)->
@@ -177,7 +192,9 @@ handle_query = (results)->
 	else
     ths = for attr_name in results.attr_names
       "<th>#{attr_name}</th>"
-    trs = for item in results.items
+    $("#query_results_table > thead").html("<tr><th></th><th>Item Name</th>#{ths.join('')}</tr>")
+    $("#query_results_table > tbody").html('')
+    for item in results.items
       tds = for attr_name in results.attr_names
         attr_vals = item.attrs[attr_name]
         if attr_vals?
@@ -187,16 +204,17 @@ handle_query = (results)->
             "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"false\">#{attr_vals.join('')}</td>"
         else
           "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"false\"></td>"
-      "<tr data-item-name=\"#{item.name}\"><td>#{item.name}</td>#{tds.join("")}</tr>"
-    $("#query_results_table > thead").html("<tr><th>Item Name</th>#{ths.join('')}</tr>")
-    $("#query_results_table > tbody").html(trs.join(""))
+      delTd = $('<td class="delete">x</td>').click ()->
+        confirm_delete_item($(this).closest('tr').attr('data-item-name'))
+      tr = $('<tr></tr>').attr('data-item-name', item.name).append(delTd).append('<td>'+item.name+'</td>').append(tds.join(''))
+      $("#query_results_table > tbody").append(tr)
     
     # add click listener
     $("#query_results_table > tbody > tr").each((index, val)->
       # for each td
       $(val).children("td").each((jindex, tdval)->
-        #skip 0 index since it is item name
-        if(jindex > 0)
+        #skip 0 and 1 index since it is item name
+        if(jindex > 1)
           handler_in = ()->
             $(this).addClass("edititem").dblclick(()->
               item_name = $(this).parent().attr("data-item-name")
@@ -238,16 +256,18 @@ metadata = (domain)->
     $('#domain_metadata_modal').modal('show')
   )
 
-# watch for confirm deletion and enable delete button
-$(()->
-  $("input[name=confirm_delete]").keydown((key)->
-    # DELET + E
-    if($("input[name=confirm_delete]").val() == "DELET" && key.keyCode == 69)
-      $("#confirm_delete_domain_btn").removeAttr("disabled").addClass("danger").removeClass("secondary")
-    else
-      $("#confirm_delete_domain_btn").attr("disabled", "disabled").addClass("secondary").removeClass("danger")
+confirm_delete_item = (name)->
+  $('#item_delete_modal').find('input[name="domain_name"]').val(domain_from_query())
+  $('#item_delete_modal').find('input[name="item_name"]').val(name)
+  $('#item_delete_modal').modal('show')
+
+delete_item = ()->
+  domain = $('#item_delete_modal').find('input[name="domain_name"]').val()
+  name = $('#item_delete_modal').find('input[name="item_name"]').val()
+  sdb.delete_attributes(domain, name, {}, (res)->
+    $('#query_results_table').find('*[data-item-name="'+name+'"]').remove()
+    $('#item_delete_modal').hide()
   )
-)
 
 confirm_delete = (domain)->
 	$("#domain_delete_label").html("<h2>Delete #{domain}?</h2>")

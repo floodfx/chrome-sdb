@@ -38,3 +38,15 @@ table.multivalued tr:first-child {
 td.edititem {
   background-color: #e7e7ff;
 }
+table#query_results_table td.delete {
+  font-family: Arial, sans-serif;
+  line-height: 18px;
+  padding: 5px;
+  cursor: pointer;
+  vertical-align: middle;
+  color: #a8a8a8;
+}
+table#query_results_table td.delete:hover {
+  color: #404040;
+  background-color: #FDDFDE;
+}

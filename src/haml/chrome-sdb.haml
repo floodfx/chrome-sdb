@@ -217,6 +217,34 @@
         %button#confirm_delete_domain_cancel.btn.secondary()
           Cancel
 
+    #item_delete_modal.modal.hide.fade(style="display: none;")
+      .modal-header
+        %a.close#close-model(href="#")
+          x
+        #domain_metadata_label
+          %h3
+            Delete Item
+      .modal-body
+        %h2
+          Do you really want to delete this item?
+        %form
+          %fieldset
+            .clearfix
+              %label(for="domainName")
+                Domain Name
+              .input
+                %input.span5(name="domain_name" type="text")
+            .clearfix
+              %label(for="itemName")
+                Item Name
+              .input
+                %input.span5(name="item_name" type="text")
+      .modal-footer
+        %a#delete_item_btn_yes.btn.primary(href="#")
+          Yes
+        %a#delete_item_btn_cancel.btn(href="#")
+          Cancel
+
     #domain_metadata_modal.modal.hide.fade(style="display: none;")
       .modal-header
         %a.close#close-model(href="#")
