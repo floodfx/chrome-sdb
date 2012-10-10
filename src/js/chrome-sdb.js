@@ -1005,7 +1005,7 @@ $(function() {
   });
 });
 add_domains = function(domains) {
-  var btn_del, btn_md, domain, td, tr, _i, _j, _len, _len2, _results;
+  var btn_del, btn_md, domain, name, td, tr, _i, _j, _len, _len2, _results;
   if (domains.length === 0) {
     tr = "<tr><td>No domains in this region</td></tr>";
     return $("#domains_table > tbody").html(tr);
@@ -1021,7 +1021,12 @@ add_domains = function(domains) {
       btn_del.click(function() {
         return confirm_delete(domain);
       });
-      td = $("<td>" + domain + "<br /></td>").append(btn_md).append(btn_del);
+      name = $('<a href="#">' + domain + '</a>').click(function() {
+        var domain_name;
+        domain_name = $(this).html();
+        return $('#query_expr').val('select * from `' + domain_name + '`');
+      });
+      td = $("<td></td>").append(name).append('<br />').append(btn_md).append(btn_del);
       tr = $("<tr></tr>").append(td);
       $("#domains_table > tbody").append(tr);
     }

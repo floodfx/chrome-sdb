@@ -108,7 +108,10 @@ add_domains = (domains)->
 			btn_del = $("<button id=\"delete_#{domain}\" class=\"btn\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>")
 			btn_del.click () ->
 				confirm_delete(domain)
-			td = $("<td>#{domain}<br /></td>").append(btn_md).append(btn_del)
+			name = $('<a href="#">'+domain+'</a>').click ()->
+				domain_name = $(this).html()
+				$('#query_expr').val('select * from `'+domain_name+'`')
+			td = $("<td></td>").append(name).append('<br />').append(btn_md).append(btn_del)
 			tr = $("<tr></tr>").append(td)
 			$("#domains_table > tbody").append(tr)
   $("#domain_select > option").remove()
@@ -233,7 +236,6 @@ handle_query = (results)->
             $(this).removeClass('edititem')
           $(tdval).hover(handler_in,handler_out)
       )
-
     )
   $("#query_btn").button('reset')
 
