@@ -42,6 +42,7 @@ table#query_results_table td.delete {
   font-family: Arial, sans-serif;
   line-height: 18px;
   padding: 5px;
+  width: .5em;
   cursor: pointer;
   vertical-align: middle;
   color: #a8a8a8;
