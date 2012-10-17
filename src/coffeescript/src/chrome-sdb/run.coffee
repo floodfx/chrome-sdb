@@ -102,10 +102,10 @@ add_domains = (domains)->
 	else
 		$("#domains_table > tbody").html('')
 		for domain in domains
-			btn_md = $("<button id=\"metadata_#{domain}\" class=\"btn info\">metadata</a>")
+			btn_md = $("<button id=\"metadata_#{domain}\" data-domain=\"#{domain}\" class=\"btn info\">metadata</a>")
 			btn_md.click ()->
-				metadata(domain)
-			btn_del = $("<button id=\"delete_#{domain}\" data-domain=\"#{domain}\"class=\"btn\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>")
+				metadata($(this).attr('data-domain'))
+			btn_del = $("<button id=\"delete_#{domain}\" data-domain=\"#{domain}\" class=\"btn\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>")
 			btn_del.click () ->
 				confirm_delete($(this).attr('data-domain'))
 			name = $('<a href="#">'+domain+'</a>').click ()->

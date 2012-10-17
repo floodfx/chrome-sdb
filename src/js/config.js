@@ -1,3 +1,27 @@
+var after_intro;
+
+after_intro = function() {
+  Storage.set("chrome-sdb-config-intro", "true");
+  $('#create_profile_modal').modal('show');
+  return guiders.hideAll();
+};
+
+$(function() {
+  if (Storage.get("chrome-sdb-config-intro") === null) {
+    return guiders.createGuider({
+      buttons: [
+        {
+          name: "Close",
+          onclick: after_intro
+        }
+      ],
+      description: "Welcome to Simple DB Tool for Chrome.  Please setup one or more AWS Credentials to start using this tool!",
+      id: "first",
+      overlay: true,
+      title: "Chrome Simple DB Tool: Configuration"
+    }).show();
+  }
+});
 var Storage;
 
 Storage = (function() {
@@ -167,30 +191,6 @@ Profile = (function() {
   return Profile;
 
 })();
-var after_intro;
-
-after_intro = function() {
-  Storage.set("chrome-sdb-config-intro", "true");
-  $('#create_profile_modal').modal('show');
-  return guiders.hideAll();
-};
-
-$(function() {
-  if (Storage.get("chrome-sdb-config-intro") === null) {
-    return guiders.createGuider({
-      buttons: [
-        {
-          name: "Close",
-          onclick: after_intro
-        }
-      ],
-      description: "Welcome to Simple DB Tool for Chrome.  Please setup one or more AWS Credentials to start using this tool!",
-      id: "first",
-      overlay: true,
-      title: "Chrome Simple DB Tool: Configuration"
-    }).show();
-  }
-});
 var Settings;
 
 Settings = (function() {

@@ -1,378 +1,270 @@
-var SHA1;
+var add_sample_domain, finish_tour, optional_add_domain, sample_query, sample_query_results;
 
-SHA1 = (function() {
-  var binb2rstr, binb_sha1, bit_rol, pub, rstr2any, rstr2b64, rstr2binb, rstr2hex, rstr_hmac_sha1, rstr_sha1, safe_add, sha1_ft, sha1_kt, str2rstr_utf16be, str2rstr_utf16le, str2rstr_utf8;
-  pub = {};
-  rstr_sha1 = function(s) {
-    return binb2rstr(binb_sha1(rstr2binb(s), s.length * 8));
-  };
-  rstr_hmac_sha1 = function(key, data) {
-    var bkey, hash, i, ipad, opad, _i;
-    bkey = rstr2binb(key);
-    if (bkey.length > 16) {
-      bkey = binb_sha1(bkey, key.length * 8);
-    }
-    ipad = Array(16);
-    opad = Array(16);
-    for (i = _i = 0; _i < 16; i = ++_i) {
-      ipad[i] = bkey[i] ^ 0x36363636;
-      opad[i] = bkey[i] ^ 0x5C5C5C5C;
-    }
-    hash = binb_sha1(ipad.concat(rstr2binb(data)), 512 + data.length * 8);
-    return binb2rstr(binb_sha1(opad.concat(hash), 512 + 160));
-  };
-  rstr2hex = function(input, lower_hexcase) {
-    var hex_tab, i, output, x, _i, _ref;
-    if (lower_hexcase == null) {
-      lower_hexcase = true;
-    }
-    hex_tab = lower_hexcase ? "0123456789abcdef" : "0123456789ABCDEF";
-    output = "";
-    for (i = _i = 0, _ref = input.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      x = input.charCodeAt(i);
-      output += hex_tab.charAt((x >>> 4) & 0x0F) + hex_tab.charAt(x & 0x0F);
-    }
-    return output;
-  };
-  rstr2b64 = function(input, b64pad) {
-    var i, j, len, output, tab, triplet, _i, _j;
-    if (b64pad == null) {
-      b64pad = "=";
-    }
-    tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    output = "";
-    len = input.length;
-    for (i = _i = 0; _i < len; i = _i += 3) {
-      triplet = (input.charCodeAt(i) << 16) | (i + 1 < len ? input.charCodeAt(i + 1) << 8 : 0) | (i + 2 < len ? input.charCodeAt(i + 2) : 0);
-      for (j = _j = 0; _j < 4; j = ++_j) {
-        if (i * 8 + j * 6 > input.length * 8) {
-          output += b64pad;
-        } else {
-          output += tab.charAt((triplet >>> 6 * (3 - j)) & 0x3F);
-        }
-      }
-    }
-    return output;
-  };
-  rstr2any = function(input, encoding) {
-    var dividend, divisor, full_length, i, output, q, quotient, remainders, x, _i, _j, _k, _l, _ref, _ref1, _ref2, _ref3;
-    divisor = encoding.length;
-    remainders = Array();
-    dividend = Array(Math.ceil(input.length / 2));
-    for (i = _i = 0, _ref = dividend.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      dividend[i] = (input.charCodeAt(i * 2) << 8) | input.charCodeAt(i * 2 + 1);
-    }
-    while (dividend.length > 0) {
-      quotient = Array();
-      x = 0;
-      for (i = _j = 0, _ref1 = dividend.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
-        x = (x << 16) + dividend[i];
-        q = Math.floor(x / divisor);
-        x -= q * divisor;
-        if (quotient.length > 0 || q > 0) {
-          quotient[quotient.length] = q;
-        }
-      }
-      remainders[remainders.length] = x;
-      dividend = quotient;
-    }
-    output = "";
-    for (i = _k = _ref2 = remainders.length - 1; _ref2 <= 0 ? _k <= 0 : _k >= 0; i = _ref2 <= 0 ? ++_k : --_k) {
-      output += encoding.charAt(remainders[i]);
-    }
-    full_length = Math.ceil(input.length * 8 / (Math.log(encoding.length) / Math.log(2)));
-    for (i = _l = _ref3 = output.length; _ref3 <= full_length ? _l <= full_length : _l >= full_length; i = _ref3 <= full_length ? ++_l : --_l) {
-      output = encoding[0] + output;
-    }
-    return output;
-  };
-  str2rstr_utf8 = function(input) {
-    var i, output, x, y, _i, _ref;
-    output = "";
-    for (i = _i = 0, _ref = input.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      x = input.charCodeAt(i);
-      y = i + 1 < input.length ? input.charCodeAt(i + 1) : 0;
-      if (0xD800 <= x && x <= 0xDBFF && 0xDC00 <= y && y <= 0xDFFF) {
-        x = 0x10000 + ((x & 0x03FF) << 10) + (y & 0x03FF);
-        i++;
-      }
-      if (x <= 0x7F) {
-        output += String.fromCharCode(x);
-      } else if (x <= 0x7FF) {
-        output += String.fromCharCode(0xC0 | ((x >>> 6) & 0x1F), 0x80 | (x & 0x3F));
-      } else if (x <= 0xFFFF) {
-        output += String.fromCharCode(0xE0 | ((x >>> 12) & 0x0F), 0x80 | ((x >>> 6) & 0x3F), 0x80 | (x & 0x3F));
-      } else if (x <= 0x1FFFFF) {
-        output += String.fromCharCode(0xF0 | ((x >>> 18) & 0x07), 0x80 | ((x >>> 12) & 0x3F), 0x80 | ((x >>> 6) & 0x3F), 0x80 | (x & 0x3F));
-      }
-    }
-    return output;
-  };
-  /*
-     Encode a string as utf-16
-  */
-
-  str2rstr_utf16le = function(input) {
-    var i, output, _i, _ref;
-    output = "";
-    for (i = _i = 0, _ref = input.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      output += String.fromCharCode(input.charCodeAt(i) & 0xFF, (input.charCodeAt(i) >>> 8) & 0xFF);
-    }
-    return output;
-  };
-  str2rstr_utf16be = function(input) {
-    var i, output, _i, _ref;
-    output = "";
-    for (i = _i = 0, _ref = input.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      output += String.fromCharCode((input.charCodeAt(i) >>> 8) & 0xFF, input.charCodeAt(i) & 0xFF);
-    }
-    return output;
-  };
-  /*
-     Convert a raw string to an array of big-endian words
-     Characters >255 have their high-byte silently ignored.
-  */
-
-  rstr2binb = function(input) {
-    var i, output, _i, _j, _ref, _ref1;
-    output = Array(input.length >> 2);
-    for (i = _i = 0, _ref = output.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-      output[i] = 0;
-    }
-    for (i = _j = 0, _ref1 = input.length * 8; _j < _ref1; i = _j += 8) {
-      output[i >> 5] |= (input.charCodeAt(i / 8) & 0xFF) << (24 - i % 32);
-    }
-    return output;
-  };
-  /*
-     Convert an array of little-endian words to a string
-  */
-
-  binb2rstr = function(input) {
-    var i, output, _i, _ref;
-    output = "";
-    for (i = _i = 0, _ref = input.length * 32; _i < _ref; i = _i += 8) {
-      output += String.fromCharCode((input[i >> 5] >>> (24 - i % 32)) & 0xFF);
-    }
-    return output;
-  };
-  /*
-     Calculate the SHA-1 of an array of big-endian words, and a bit length
-  */
-
-  binb_sha1 = function(x, len) {
-    var a, b, c, d, e, i, j, olda, oldb, oldc, oldd, olde, t, w, _i, _j, _ref;
-    x[len >> 5] |= 0x80 << (24 - len % 32);
-    x[((len + 64 >> 9) << 4) + 15] = len;
-    w = Array(80);
-    a = 1732584193;
-    b = -271733879;
-    c = -1732584194;
-    d = 271733878;
-    e = -1009589776;
-    for (i = _i = 0, _ref = x.length; _i < _ref; i = _i += 16) {
-      olda = a;
-      oldb = b;
-      oldc = c;
-      oldd = d;
-      olde = e;
-      for (j = _j = 0; _j < 80; j = ++_j) {
-        if (j < 16) {
-          w[j] = x[i + j];
-        } else {
-          w[j] = bit_rol(w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16], 1);
-        }
-        t = safe_add(safe_add(bit_rol(a, 5), sha1_ft(j, b, c, d)), safe_add(safe_add(e, w[j]), sha1_kt(j)));
-        e = d;
-        d = c;
-        c = bit_rol(b, 30);
-        b = a;
-        a = t;
-      }
-      a = safe_add(a, olda);
-      b = safe_add(b, oldb);
-      c = safe_add(c, oldc);
-      d = safe_add(d, oldd);
-      e = safe_add(e, olde);
-    }
-    return Array(a, b, c, d, e);
-  };
-  /*
-     Perform the appropriate triplet combination function for the current iteration
-  */
-
-  sha1_ft = function(t, b, c, d) {
-    if (t < 20) {
-      return (b & c) | ((~b) & d);
-    } else if (t < 40) {
-      return b ^ c ^ d;
-    } else if (t < 60) {
-      return (b & c) | (b & d) | (c & d);
-    } else {
-      return b ^ c ^ d;
-    }
-  };
-  /*
-     Determine the appropriate additive constant for the current iteration
-  */
-
-  sha1_kt = function(t) {
-    if (t < 20) {
-      return 1518500249;
-    } else if (t < 40) {
-      return 1859775393;
-    } else if (t < 60) {
-      return -1894007588;
-    } else {
-      return -899497514;
-    }
-  };
-  /*
-     Add integers, wrapping at 2^32. This uses 16-bit operations internally
-     to work around bugs in some JS interpreters.
-  */
-
-  safe_add = function(x, y) {
-    var lsw, msw;
-    lsw = (x & 0xFFFF) + (y & 0xFFFF);
-    msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-    return (msw << 16) | (lsw & 0xFFFF);
-  };
-  /*
-     Bitwise rotate a 32-bit number to the left.
-  */
-
-  bit_rol = function(num, cnt) {
-    return (num << cnt) | (num >>> (32 - cnt));
-  };
-  pub.hex_sha1 = function(s) {
-    return rstr2hex(rstr_sha1(str2rstr_utf8(s)));
-  };
-  pub.b64_sha1 = function(s) {
-    return rstr2b64(rstr_sha1(str2rstr_utf8(s)));
-  };
-  pub.any_sha1 = function(s, e) {
-    return rstr2any(rstr_sha1(str2rstr_utf8(s)), e);
-  };
-  pub.hex_hmac_sha1 = function(k, d) {
-    return rstr2hex(rstr_hmac_sha1(str2rstr_utf8(k), str2rstr_utf8(d)));
-  };
-  pub.b64_hmac_sha1 = function(k, d) {
-    return rstr2b64(rstr_hmac_sha1(str2rstr_utf8(k), str2rstr_utf8(d)));
-  };
-  pub.any_hmac_sha1 = function(k, d, e) {
-    return rstr2any(rstr_hmac_sha1(str2rstr_utf8(k), str2rstr_utf8(d)), e);
-  };
-  return pub;
-})();
-var Storage;
-
-Storage = (function() {
-  var pub;
-  pub = {};
-  pub.get = function(key, is_json) {
-    var val;
-    if (is_json == null) {
-      is_json = false;
-    }
-    val = localStorage.getItem(key);
-    if (is_json) {
-      val = JSON.parse(val);
-    }
-    return val;
-  };
-  pub.set = function(key, val, is_json) {
-    if (is_json == null) {
-      is_json = false;
-    }
-    if (is_json) {
-      val = JSON.stringify(val);
-    }
-    localStorage.setItem(key, val);
-    return val;
-  };
-  pub.del = function(key) {
-    return localStorage.removeItem(key);
-  };
-  return pub;
-})();
-var Settings;
-
-Settings = (function() {
-
-  function Settings(access_key, secret_key, region, version, https_protocol) {
-    this.access_key = access_key;
-    this.secret_key = secret_key;
-    this.region = region != null ? region : "sdb.amazonaws.com";
-    this.version = version != null ? version : "2009-04-15";
-    this.https_protocol = https_protocol != null ? https_protocol : false;
+add_sample_domain = function() {
+  if ($("#domain_select > option").length < 1) {
+    return add_domains(["example_domain_chrome_sdb"]);
   }
+};
 
-  Settings.prototype.use_access_key = function(access_key) {
-    this.access_key = access_key;
-    return this;
+optional_add_domain = function() {
+  add_sample_domain();
+  return guiders.next();
+};
+
+sample_query = function() {
+  var domain;
+  domain = $($("#domain_select > option")[0]).text();
+  $("#query_expr").val("select * from `" + domain + "`");
+  return guiders.next();
+};
+
+sample_query_results = function() {
+  var results;
+  results = {
+    items: [
+      {
+        name: "item name",
+        attrs: {
+          "single value attribute": ["attribute value"],
+          "multivalued attribute": ["val A", "val B"]
+        }
+      }
+    ],
+    attr_names: ["single value attribute", "multivalued attribute"]
   };
+  handle_query(results);
+  return guiders.next();
+};
 
-  Settings.prototype.use_secret_key = function(secret_key) {
-    this.secret_key = secret_key;
-    return this;
+finish_tour = function() {
+  var results;
+  results = {
+    items: [],
+    attr_names: []
   };
+  handle_query(results);
+  $("#query_expr").val("");
+  update_domains_table();
+  Storage.set("chrome-sdb-intro", "true");
+  return guiders.hideAll();
+};
 
-  Settings.prototype.use_region = function(region) {
-    this.region = region;
-    return this;
+$(function() {
+  if (Storage.get("chrome-sdb-intro") === null) {
+    guiders.createGuider({
+      buttons: [
+        {
+          name: "Next",
+          onclick: optional_add_domain
+        }
+      ],
+      description: "This is the Query page in the Chrome Simple DB Tool.  This page is where you add and edit Items and Query your Simple DB domains.",
+      id: "first",
+      next: "second",
+      overlay: true,
+      title: "Chrome Simple DB Tool: Query Page"
+    }).show();
+    guiders.createGuider({
+      attachTo: "#domains_table",
+      buttons: [
+        {
+          name: "Next"
+        }
+      ],
+      description: "The domains table shows all the Simple DB domains in the selected Amazon Web Services Region.",
+      id: "second",
+      next: "third",
+      position: 2,
+      title: "Domains Table",
+      width: 450,
+      offset: {
+        top: -30,
+        left: 0
+      }
+    });
+    guiders.createGuider({
+      attachTo: "#region_select",
+      buttons: [
+        {
+          name: "Next"
+        }
+      ],
+      description: "The Region selector allows you to change the region that you are querying.  It updates the Domain table automatically.",
+      id: "third",
+      next: "forth",
+      position: 2,
+      title: "Regions Select",
+      width: 450,
+      offset: {
+        top: -30,
+        left: 0
+      }
+    });
+    guiders.createGuider({
+      attachTo: "#create_domain",
+      buttons: [
+        {
+          name: "Next"
+        }
+      ],
+      description: "If you need to add another domain, use the \"Create Domain\" button.",
+      id: "forth",
+      next: "fifth",
+      position: 2,
+      title: "Create Domain",
+      width: 450,
+      offset: {
+        top: -30,
+        left: 0
+      }
+    });
+    guiders.createGuider({
+      attachTo: "#domain_deletion_control",
+      buttons: [
+        {
+          name: "Next"
+        }
+      ],
+      description: "This button toggles domain deletion enablement.",
+      id: "fifth",
+      next: "sixth",
+      position: 2,
+      title: "Delete Domain Control",
+      width: 450,
+      offset: {
+        top: -30,
+        left: 0
+      }
+    });
+    guiders.createGuider({
+      attachTo: "#query_expr",
+      buttons: [
+        {
+          name: "Next",
+          onclick: sample_query
+        }
+      ],
+      description: "Enter domain select expressions in the query box.  Don't forget to enclose your domain in backticks (\"`\") in the query",
+      id: "sixth",
+      next: "seven",
+      position: 6,
+      title: "Query your domains",
+      width: 450,
+      offset: {
+        top: -30,
+        left: 0
+      }
+    });
+    guiders.createGuider({
+      attachTo: "#query_results_table",
+      buttons: [
+        {
+          name: "Next",
+          onclick: sample_query_results
+        }
+      ],
+      description: "Query results show up in the in the table below.",
+      id: "seven",
+      next: "eight",
+      position: 12,
+      title: "Query results",
+      width: 450,
+      offset: {
+        top: -30,
+        left: 0
+      }
+    });
+    guiders.createGuider({
+      attachTo: "#query_results_table",
+      buttons: [
+        {
+          name: "Next"
+        }
+      ],
+      description: "Scroll over an attribute and click on it to edit.",
+      id: "eight",
+      next: "ninth",
+      position: 6,
+      title: "Edit attributes",
+      width: 450,
+      offset: {
+        top: -30,
+        left: 0
+      }
+    });
+    return guiders.createGuider({
+      buttons: [
+        {
+          name: "Close",
+          onclick: finish_tour
+        }
+      ],
+      description: "That's it!  Please submit feedback and bugs and enjoy.",
+      id: "ninth",
+      overlay: true,
+      title: "Cool? Cool..."
+    });
+  }
+});
+var AwsUtils;
+
+AwsUtils = (function() {
+  var hhmmss, pub, sort_lower_case, yyyymmdd, zeropad;
+  zeropad = function(to_pad) {
+    to_pad = to_pad.toString();
+    if (to_pad.length < 2) {
+      to_pad = "0" + to_pad;
+    }
+    return to_pad;
   };
-
-  Settings.prototype.use_version = function(version) {
-    this.version = version;
-    return this;
+  yyyymmdd = function(date) {
+    return [date.getUTCFullYear(), zeropad(date.getUTCMonth() + 1), zeropad(date.getUTCDate())].join("-");
   };
-
-  Settings.prototype.use_https_protocol = function(true_or_false) {
-    this.https_protocol = true_or_false;
-    return this;
+  hhmmss = function(date) {
+    return [zeropad(date.getUTCHours()), zeropad(date.getUTCMinutes()), zeropad(date.getUTCSeconds())].join(':');
   };
-
-  Settings.prototype.get_access_key = function() {
-    return this.access_key;
-  };
-
-  Settings.prototype.get_secret_key = function() {
-    return this.secret_key;
-  };
-
-  Settings.prototype.get_region = function() {
-    return this.region;
-  };
-
-  Settings.prototype.get_version = function() {
-    return this.version;
-  };
-
-  Settings.prototype.get_use_https = function() {
-    return this.https_protocol;
-  };
-
-  Settings.prototype.to_json = function() {
-    return {
-      access_key: this.access_key,
-      secret_key: this.secret_key,
-      region: this.region,
-      version: this.version,
-      https_protocol: this.https_protocol
-    };
-  };
-
-  Settings.from_json = function(json) {
-    if (json) {
-      return new Settings(json["access_key"], json["secret_key"], json["region"], json["version"], json["https_protocol"]);
+  sort_lower_case = function(s1, s2) {
+    if (s1 === s2) {
+      return 0;
     } else {
-      return null;
+      if (s1.toLowerCase() > s2.toLowerCase()) {
+        return 1;
+      } else {
+        return -1;
+      }
     }
   };
-
-  return Settings;
-
+  pub = {};
+  pub.date_time_format = function(date) {
+    if (date == null) {
+      date = new Date();
+    }
+    return "" + (yyyymmdd(date)) + "T" + (hhmmss(date)) + ".000Z";
+  };
+  pub.generate_sig = function(params, aws_secret_key) {
+    var k, param_keys, to_sign, v;
+    param_keys = (function() {
+      var _results;
+      _results = [];
+      for (k in params) {
+        v = params[k];
+        _results.push(k);
+      }
+      return _results;
+    })();
+    param_keys.sort(sort_lower_case);
+    to_sign = (function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = param_keys.length; _i < _len; _i++) {
+        k = param_keys[_i];
+        _results.push("" + k + params[k]);
+      }
+      return _results;
+    })();
+    return SHA1.b64_hmac_sha1(aws_secret_key, to_sign.join(""));
+  };
+  return pub;
 })();
 var SimpleDB,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -784,6 +676,37 @@ SimpleDB = (function() {
   return SimpleDB;
 
 })();
+var Storage;
+
+Storage = (function() {
+  var pub;
+  pub = {};
+  pub.get = function(key, is_json) {
+    var val;
+    if (is_json == null) {
+      is_json = false;
+    }
+    val = localStorage.getItem(key);
+    if (is_json) {
+      val = JSON.parse(val);
+    }
+    return val;
+  };
+  pub.set = function(key, val, is_json) {
+    if (is_json == null) {
+      is_json = false;
+    }
+    if (is_json) {
+      val = JSON.stringify(val);
+    }
+    localStorage.setItem(key, val);
+    return val;
+  };
+  pub.del = function(key) {
+    return localStorage.removeItem(key);
+  };
+  return pub;
+})();
 var Profile;
 
 Profile = (function() {
@@ -922,65 +845,350 @@ Profile = (function() {
   return Profile;
 
 })();
-var AwsUtils;
+var SHA1;
 
-AwsUtils = (function() {
-  var hhmmss, pub, sort_lower_case, yyyymmdd, zeropad;
-  zeropad = function(to_pad) {
-    to_pad = to_pad.toString();
-    if (to_pad.length < 2) {
-      to_pad = "0" + to_pad;
-    }
-    return to_pad;
-  };
-  yyyymmdd = function(date) {
-    return [date.getUTCFullYear(), zeropad(date.getUTCMonth() + 1), zeropad(date.getUTCDate())].join("-");
-  };
-  hhmmss = function(date) {
-    return [zeropad(date.getUTCHours()), zeropad(date.getUTCMinutes()), zeropad(date.getUTCSeconds())].join(':');
-  };
-  sort_lower_case = function(s1, s2) {
-    if (s1 === s2) {
-      return 0;
-    } else {
-      if (s1.toLowerCase() > s2.toLowerCase()) {
-        return 1;
-      } else {
-        return -1;
-      }
-    }
-  };
+SHA1 = (function() {
+  var binb2rstr, binb_sha1, bit_rol, pub, rstr2any, rstr2b64, rstr2binb, rstr2hex, rstr_hmac_sha1, rstr_sha1, safe_add, sha1_ft, sha1_kt, str2rstr_utf16be, str2rstr_utf16le, str2rstr_utf8;
   pub = {};
-  pub.date_time_format = function(date) {
-    if (date == null) {
-      date = new Date();
-    }
-    return "" + (yyyymmdd(date)) + "T" + (hhmmss(date)) + ".000Z";
+  rstr_sha1 = function(s) {
+    return binb2rstr(binb_sha1(rstr2binb(s), s.length * 8));
   };
-  pub.generate_sig = function(params, aws_secret_key) {
-    var k, param_keys, to_sign, v;
-    param_keys = (function() {
-      var _results;
-      _results = [];
-      for (k in params) {
-        v = params[k];
-        _results.push(k);
+  rstr_hmac_sha1 = function(key, data) {
+    var bkey, hash, i, ipad, opad, _i;
+    bkey = rstr2binb(key);
+    if (bkey.length > 16) {
+      bkey = binb_sha1(bkey, key.length * 8);
+    }
+    ipad = Array(16);
+    opad = Array(16);
+    for (i = _i = 0; _i < 16; i = ++_i) {
+      ipad[i] = bkey[i] ^ 0x36363636;
+      opad[i] = bkey[i] ^ 0x5C5C5C5C;
+    }
+    hash = binb_sha1(ipad.concat(rstr2binb(data)), 512 + data.length * 8);
+    return binb2rstr(binb_sha1(opad.concat(hash), 512 + 160));
+  };
+  rstr2hex = function(input, lower_hexcase) {
+    var hex_tab, i, output, x, _i, _ref;
+    if (lower_hexcase == null) {
+      lower_hexcase = true;
+    }
+    hex_tab = lower_hexcase ? "0123456789abcdef" : "0123456789ABCDEF";
+    output = "";
+    for (i = _i = 0, _ref = input.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      x = input.charCodeAt(i);
+      output += hex_tab.charAt((x >>> 4) & 0x0F) + hex_tab.charAt(x & 0x0F);
+    }
+    return output;
+  };
+  rstr2b64 = function(input, b64pad) {
+    var i, j, len, output, tab, triplet, _i, _j;
+    if (b64pad == null) {
+      b64pad = "=";
+    }
+    tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    output = "";
+    len = input.length;
+    for (i = _i = 0; _i < len; i = _i += 3) {
+      triplet = (input.charCodeAt(i) << 16) | (i + 1 < len ? input.charCodeAt(i + 1) << 8 : 0) | (i + 2 < len ? input.charCodeAt(i + 2) : 0);
+      for (j = _j = 0; _j < 4; j = ++_j) {
+        if (i * 8 + j * 6 > input.length * 8) {
+          output += b64pad;
+        } else {
+          output += tab.charAt((triplet >>> 6 * (3 - j)) & 0x3F);
+        }
       }
-      return _results;
-    })();
-    param_keys.sort(sort_lower_case);
-    to_sign = (function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = param_keys.length; _i < _len; _i++) {
-        k = param_keys[_i];
-        _results.push("" + k + params[k]);
+    }
+    return output;
+  };
+  rstr2any = function(input, encoding) {
+    var dividend, divisor, full_length, i, output, q, quotient, remainders, x, _i, _j, _k, _l, _ref, _ref1, _ref2, _ref3;
+    divisor = encoding.length;
+    remainders = Array();
+    dividend = Array(Math.ceil(input.length / 2));
+    for (i = _i = 0, _ref = dividend.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      dividend[i] = (input.charCodeAt(i * 2) << 8) | input.charCodeAt(i * 2 + 1);
+    }
+    while (dividend.length > 0) {
+      quotient = Array();
+      x = 0;
+      for (i = _j = 0, _ref1 = dividend.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
+        x = (x << 16) + dividend[i];
+        q = Math.floor(x / divisor);
+        x -= q * divisor;
+        if (quotient.length > 0 || q > 0) {
+          quotient[quotient.length] = q;
+        }
       }
-      return _results;
-    })();
-    return SHA1.b64_hmac_sha1(aws_secret_key, to_sign.join(""));
+      remainders[remainders.length] = x;
+      dividend = quotient;
+    }
+    output = "";
+    for (i = _k = _ref2 = remainders.length - 1; _ref2 <= 0 ? _k <= 0 : _k >= 0; i = _ref2 <= 0 ? ++_k : --_k) {
+      output += encoding.charAt(remainders[i]);
+    }
+    full_length = Math.ceil(input.length * 8 / (Math.log(encoding.length) / Math.log(2)));
+    for (i = _l = _ref3 = output.length; _ref3 <= full_length ? _l <= full_length : _l >= full_length; i = _ref3 <= full_length ? ++_l : --_l) {
+      output = encoding[0] + output;
+    }
+    return output;
+  };
+  str2rstr_utf8 = function(input) {
+    var i, output, x, y, _i, _ref;
+    output = "";
+    for (i = _i = 0, _ref = input.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      x = input.charCodeAt(i);
+      y = i + 1 < input.length ? input.charCodeAt(i + 1) : 0;
+      if (0xD800 <= x && x <= 0xDBFF && 0xDC00 <= y && y <= 0xDFFF) {
+        x = 0x10000 + ((x & 0x03FF) << 10) + (y & 0x03FF);
+        i++;
+      }
+      if (x <= 0x7F) {
+        output += String.fromCharCode(x);
+      } else if (x <= 0x7FF) {
+        output += String.fromCharCode(0xC0 | ((x >>> 6) & 0x1F), 0x80 | (x & 0x3F));
+      } else if (x <= 0xFFFF) {
+        output += String.fromCharCode(0xE0 | ((x >>> 12) & 0x0F), 0x80 | ((x >>> 6) & 0x3F), 0x80 | (x & 0x3F));
+      } else if (x <= 0x1FFFFF) {
+        output += String.fromCharCode(0xF0 | ((x >>> 18) & 0x07), 0x80 | ((x >>> 12) & 0x3F), 0x80 | ((x >>> 6) & 0x3F), 0x80 | (x & 0x3F));
+      }
+    }
+    return output;
+  };
+  /*
+     Encode a string as utf-16
+  */
+
+  str2rstr_utf16le = function(input) {
+    var i, output, _i, _ref;
+    output = "";
+    for (i = _i = 0, _ref = input.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      output += String.fromCharCode(input.charCodeAt(i) & 0xFF, (input.charCodeAt(i) >>> 8) & 0xFF);
+    }
+    return output;
+  };
+  str2rstr_utf16be = function(input) {
+    var i, output, _i, _ref;
+    output = "";
+    for (i = _i = 0, _ref = input.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      output += String.fromCharCode((input.charCodeAt(i) >>> 8) & 0xFF, input.charCodeAt(i) & 0xFF);
+    }
+    return output;
+  };
+  /*
+     Convert a raw string to an array of big-endian words
+     Characters >255 have their high-byte silently ignored.
+  */
+
+  rstr2binb = function(input) {
+    var i, output, _i, _j, _ref, _ref1;
+    output = Array(input.length >> 2);
+    for (i = _i = 0, _ref = output.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+      output[i] = 0;
+    }
+    for (i = _j = 0, _ref1 = input.length * 8; _j < _ref1; i = _j += 8) {
+      output[i >> 5] |= (input.charCodeAt(i / 8) & 0xFF) << (24 - i % 32);
+    }
+    return output;
+  };
+  /*
+     Convert an array of little-endian words to a string
+  */
+
+  binb2rstr = function(input) {
+    var i, output, _i, _ref;
+    output = "";
+    for (i = _i = 0, _ref = input.length * 32; _i < _ref; i = _i += 8) {
+      output += String.fromCharCode((input[i >> 5] >>> (24 - i % 32)) & 0xFF);
+    }
+    return output;
+  };
+  /*
+     Calculate the SHA-1 of an array of big-endian words, and a bit length
+  */
+
+  binb_sha1 = function(x, len) {
+    var a, b, c, d, e, i, j, olda, oldb, oldc, oldd, olde, t, w, _i, _j, _ref;
+    x[len >> 5] |= 0x80 << (24 - len % 32);
+    x[((len + 64 >> 9) << 4) + 15] = len;
+    w = Array(80);
+    a = 1732584193;
+    b = -271733879;
+    c = -1732584194;
+    d = 271733878;
+    e = -1009589776;
+    for (i = _i = 0, _ref = x.length; _i < _ref; i = _i += 16) {
+      olda = a;
+      oldb = b;
+      oldc = c;
+      oldd = d;
+      olde = e;
+      for (j = _j = 0; _j < 80; j = ++_j) {
+        if (j < 16) {
+          w[j] = x[i + j];
+        } else {
+          w[j] = bit_rol(w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16], 1);
+        }
+        t = safe_add(safe_add(bit_rol(a, 5), sha1_ft(j, b, c, d)), safe_add(safe_add(e, w[j]), sha1_kt(j)));
+        e = d;
+        d = c;
+        c = bit_rol(b, 30);
+        b = a;
+        a = t;
+      }
+      a = safe_add(a, olda);
+      b = safe_add(b, oldb);
+      c = safe_add(c, oldc);
+      d = safe_add(d, oldd);
+      e = safe_add(e, olde);
+    }
+    return Array(a, b, c, d, e);
+  };
+  /*
+     Perform the appropriate triplet combination function for the current iteration
+  */
+
+  sha1_ft = function(t, b, c, d) {
+    if (t < 20) {
+      return (b & c) | ((~b) & d);
+    } else if (t < 40) {
+      return b ^ c ^ d;
+    } else if (t < 60) {
+      return (b & c) | (b & d) | (c & d);
+    } else {
+      return b ^ c ^ d;
+    }
+  };
+  /*
+     Determine the appropriate additive constant for the current iteration
+  */
+
+  sha1_kt = function(t) {
+    if (t < 20) {
+      return 1518500249;
+    } else if (t < 40) {
+      return 1859775393;
+    } else if (t < 60) {
+      return -1894007588;
+    } else {
+      return -899497514;
+    }
+  };
+  /*
+     Add integers, wrapping at 2^32. This uses 16-bit operations internally
+     to work around bugs in some JS interpreters.
+  */
+
+  safe_add = function(x, y) {
+    var lsw, msw;
+    lsw = (x & 0xFFFF) + (y & 0xFFFF);
+    msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+    return (msw << 16) | (lsw & 0xFFFF);
+  };
+  /*
+     Bitwise rotate a 32-bit number to the left.
+  */
+
+  bit_rol = function(num, cnt) {
+    return (num << cnt) | (num >>> (32 - cnt));
+  };
+  pub.hex_sha1 = function(s) {
+    return rstr2hex(rstr_sha1(str2rstr_utf8(s)));
+  };
+  pub.b64_sha1 = function(s) {
+    return rstr2b64(rstr_sha1(str2rstr_utf8(s)));
+  };
+  pub.any_sha1 = function(s, e) {
+    return rstr2any(rstr_sha1(str2rstr_utf8(s)), e);
+  };
+  pub.hex_hmac_sha1 = function(k, d) {
+    return rstr2hex(rstr_hmac_sha1(str2rstr_utf8(k), str2rstr_utf8(d)));
+  };
+  pub.b64_hmac_sha1 = function(k, d) {
+    return rstr2b64(rstr_hmac_sha1(str2rstr_utf8(k), str2rstr_utf8(d)));
+  };
+  pub.any_hmac_sha1 = function(k, d, e) {
+    return rstr2any(rstr_hmac_sha1(str2rstr_utf8(k), str2rstr_utf8(d)), e);
   };
   return pub;
+})();
+var Settings;
+
+Settings = (function() {
+
+  function Settings(access_key, secret_key, region, version, https_protocol) {
+    this.access_key = access_key;
+    this.secret_key = secret_key;
+    this.region = region != null ? region : "sdb.amazonaws.com";
+    this.version = version != null ? version : "2009-04-15";
+    this.https_protocol = https_protocol != null ? https_protocol : false;
+  }
+
+  Settings.prototype.use_access_key = function(access_key) {
+    this.access_key = access_key;
+    return this;
+  };
+
+  Settings.prototype.use_secret_key = function(secret_key) {
+    this.secret_key = secret_key;
+    return this;
+  };
+
+  Settings.prototype.use_region = function(region) {
+    this.region = region;
+    return this;
+  };
+
+  Settings.prototype.use_version = function(version) {
+    this.version = version;
+    return this;
+  };
+
+  Settings.prototype.use_https_protocol = function(true_or_false) {
+    this.https_protocol = true_or_false;
+    return this;
+  };
+
+  Settings.prototype.get_access_key = function() {
+    return this.access_key;
+  };
+
+  Settings.prototype.get_secret_key = function() {
+    return this.secret_key;
+  };
+
+  Settings.prototype.get_region = function() {
+    return this.region;
+  };
+
+  Settings.prototype.get_version = function() {
+    return this.version;
+  };
+
+  Settings.prototype.get_use_https = function() {
+    return this.https_protocol;
+  };
+
+  Settings.prototype.to_json = function() {
+    return {
+      access_key: this.access_key,
+      secret_key: this.secret_key,
+      region: this.region,
+      version: this.version,
+      https_protocol: this.https_protocol
+    };
+  };
+
+  Settings.from_json = function(json) {
+    if (json) {
+      return new Settings(json["access_key"], json["secret_key"], json["region"], json["version"], json["https_protocol"]);
+    } else {
+      return null;
+    }
+  };
+
+  return Settings;
+
 })();
 var add_domains, add_item, confirm_delete, confirm_delete_item, delete_domain, delete_item, disable_delete, domain_from_query, edit_item, enable_delete, handle_delete_toggle, handle_error, handle_query, metadata, profile, query, save_domain, save_item, sdb, update_domains_table, update_region;
 
@@ -1086,11 +1294,11 @@ add_domains = function(domains) {
     $("#domains_table > tbody").html('');
     for (_i = 0, _len = domains.length; _i < _len; _i++) {
       domain = domains[_i];
-      btn_md = $("<button id=\"metadata_" + domain + "\" class=\"btn info\">metadata</a>");
+      btn_md = $("<button id=\"metadata_" + domain + "\" data-domain=\"" + domain + "\" class=\"btn info\">metadata</a>");
       btn_md.click(function() {
-        return metadata(domain);
+        return metadata($(this).attr('data-domain'));
       });
-      btn_del = $("<button id=\"delete_" + domain + "\" data-domain=\"" + domain + "\"class=\"btn\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>");
+      btn_del = $("<button id=\"delete_" + domain + "\" data-domain=\"" + domain + "\" class=\"btn\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>");
       btn_del.click(function() {
         return confirm_delete($(this).attr('data-domain'));
       });
@@ -1362,211 +1570,3 @@ save_domain = function() {
     });
   });
 };
-var add_sample_domain, finish_tour, optional_add_domain, sample_query, sample_query_results;
-
-add_sample_domain = function() {
-  if ($("#domain_select > option").length < 1) {
-    return add_domains(["example_domain_chrome_sdb"]);
-  }
-};
-
-optional_add_domain = function() {
-  add_sample_domain();
-  return guiders.next();
-};
-
-sample_query = function() {
-  var domain;
-  domain = $($("#domain_select > option")[0]).text();
-  $("#query_expr").val("select * from `" + domain + "`");
-  return guiders.next();
-};
-
-sample_query_results = function() {
-  var results;
-  results = {
-    items: [
-      {
-        name: "item name",
-        attrs: {
-          "single value attribute": ["attribute value"],
-          "multivalued attribute": ["val A", "val B"]
-        }
-      }
-    ],
-    attr_names: ["single value attribute", "multivalued attribute"]
-  };
-  handle_query(results);
-  return guiders.next();
-};
-
-finish_tour = function() {
-  var results;
-  results = {
-    items: [],
-    attr_names: []
-  };
-  handle_query(results);
-  $("#query_expr").val("");
-  update_domains_table();
-  Storage.set("chrome-sdb-intro", "true");
-  return guiders.hideAll();
-};
-
-$(function() {
-  if (Storage.get("chrome-sdb-intro") === null) {
-    guiders.createGuider({
-      buttons: [
-        {
-          name: "Next",
-          onclick: optional_add_domain
-        }
-      ],
-      description: "This is the Query page in the Chrome Simple DB Tool.  This page is where you add and edit Items and Query your Simple DB domains.",
-      id: "first",
-      next: "second",
-      overlay: true,
-      title: "Chrome Simple DB Tool: Query Page"
-    }).show();
-    guiders.createGuider({
-      attachTo: "#domains_table",
-      buttons: [
-        {
-          name: "Next"
-        }
-      ],
-      description: "The domains table shows all the Simple DB domains in the selected Amazon Web Services Region.",
-      id: "second",
-      next: "third",
-      position: 2,
-      title: "Domains Table",
-      width: 450,
-      offset: {
-        top: -30,
-        left: 0
-      }
-    });
-    guiders.createGuider({
-      attachTo: "#region_select",
-      buttons: [
-        {
-          name: "Next"
-        }
-      ],
-      description: "The Region selector allows you to change the region that you are querying.  It updates the Domain table automatically.",
-      id: "third",
-      next: "forth",
-      position: 2,
-      title: "Regions Select",
-      width: 450,
-      offset: {
-        top: -30,
-        left: 0
-      }
-    });
-    guiders.createGuider({
-      attachTo: "#create_domain",
-      buttons: [
-        {
-          name: "Next"
-        }
-      ],
-      description: "If you need to add another domain, use the \"Create Domain\" button.",
-      id: "forth",
-      next: "fifth",
-      position: 2,
-      title: "Create Domain",
-      width: 450,
-      offset: {
-        top: -30,
-        left: 0
-      }
-    });
-    guiders.createGuider({
-      attachTo: "#domain_deletion_control",
-      buttons: [
-        {
-          name: "Next"
-        }
-      ],
-      description: "This button toggles domain deletion enablement.",
-      id: "fifth",
-      next: "sixth",
-      position: 2,
-      title: "Delete Domain Control",
-      width: 450,
-      offset: {
-        top: -30,
-        left: 0
-      }
-    });
-    guiders.createGuider({
-      attachTo: "#query_expr",
-      buttons: [
-        {
-          name: "Next",
-          onclick: sample_query
-        }
-      ],
-      description: "Enter domain select expressions in the query box.  Don't forget to enclose your domain in backticks (\"`\") in the query",
-      id: "sixth",
-      next: "seven",
-      position: 6,
-      title: "Query your domains",
-      width: 450,
-      offset: {
-        top: -30,
-        left: 0
-      }
-    });
-    guiders.createGuider({
-      attachTo: "#query_results_table",
-      buttons: [
-        {
-          name: "Next",
-          onclick: sample_query_results
-        }
-      ],
-      description: "Query results show up in the in the table below.",
-      id: "seven",
-      next: "eight",
-      position: 12,
-      title: "Query results",
-      width: 450,
-      offset: {
-        top: -30,
-        left: 0
-      }
-    });
-    guiders.createGuider({
-      attachTo: "#query_results_table",
-      buttons: [
-        {
-          name: "Next"
-        }
-      ],
-      description: "Scroll over an attribute and click on it to edit.",
-      id: "eight",
-      next: "ninth",
-      position: 6,
-      title: "Edit attributes",
-      width: 450,
-      offset: {
-        top: -30,
-        left: 0
-      }
-    });
-    return guiders.createGuider({
-      buttons: [
-        {
-          name: "Close",
-          onclick: finish_tour
-        }
-      ],
-      description: "That's it!  Please submit feedback and bugs and enjoy.",
-      id: "ninth",
-      overlay: true,
-      title: "Cool? Cool..."
-    });
-  }
-});
