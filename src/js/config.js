@@ -1,25 +1,5 @@
-var after_intro;
-after_intro = function() {
-  Storage.set("chrome-sdb-config-intro", "true");
-  $('#create_profile_modal').modal('show');
-  return guiders.hideAll();
-};
-$(function() {
-  if (Storage.get("chrome-sdb-config-intro") === null) {
-    return guiders.createGuider({
-      buttons: [
-        {
-          name: "Close",
-          onclick: after_intro
-        }
-      ],
-      description: "Welcome to Simple DB Tool for Chrome.  Please setup one or more AWS Credentials to start using this tool!",
-      id: "first",
-      overlay: true,
-      title: "Chrome Simple DB Tool: Configuration"
-    }).show();
-  }
-});var Storage;
+var Storage;
+
 Storage = (function() {
   var pub;
   pub = {};
@@ -48,91 +28,39 @@ Storage = (function() {
     return localStorage.removeItem(key);
   };
   return pub;
-})();var Settings;
-Settings = (function() {
-  function Settings(access_key, secret_key, region, version, https_protocol) {
-    this.access_key = access_key;
-    this.secret_key = secret_key;
-    this.region = region != null ? region : "sdb.amazonaws.com";
-    this.version = version != null ? version : "2009-04-15";
-    this.https_protocol = https_protocol != null ? https_protocol : false;
-  }
-  Settings.prototype.use_access_key = function(access_key) {
-    this.access_key = access_key;
-    return this;
-  };
-  Settings.prototype.use_secret_key = function(secret_key) {
-    this.secret_key = secret_key;
-    return this;
-  };
-  Settings.prototype.use_region = function(region) {
-    this.region = region;
-    return this;
-  };
-  Settings.prototype.use_version = function(version) {
-    this.version = version;
-    return this;
-  };
-  Settings.prototype.use_https_protocol = function(true_or_false) {
-    this.https_protocol = true_or_false;
-    return this;
-  };
-  Settings.prototype.get_access_key = function() {
-    return this.access_key;
-  };
-  Settings.prototype.get_secret_key = function() {
-    return this.secret_key;
-  };
-  Settings.prototype.get_region = function() {
-    return this.region;
-  };
-  Settings.prototype.get_version = function() {
-    return this.version;
-  };
-  Settings.prototype.get_use_https = function() {
-    return this.https_protocol;
-  };
-  Settings.prototype.to_json = function() {
-    return {
-      access_key: this.access_key,
-      secret_key: this.secret_key,
-      region: this.region,
-      version: this.version,
-      https_protocol: this.https_protocol
-    };
-  };
-  Settings.from_json = function(json) {
-    if (json) {
-      return new Settings(json["access_key"], json["secret_key"], json["region"], json["version"], json["https_protocol"]);
-    } else {
-      return null;
-    }
-  };
-  return Settings;
-})();var Profile;
+})();
+var Profile;
+
 Profile = (function() {
+
   function Profile(name, settings) {
     this.name = name;
     this.settings = settings;
   }
+
   Profile.prototype.use_name = function(name) {
     this.name = name;
     return this;
   };
+
   Profile.prototype.use_settings = function(settings) {
     this.settings = settings;
     return this;
   };
+
   Profile.prototype.get_name = function() {
     return this.name;
   };
+
   Profile.prototype.get_settings = function() {
     return this.settings;
   };
+
   Profile.prototype.make_primary = function() {
     Storage.set("chrome-sdb.primary-profile", this.name);
     return this;
   };
+
   Profile.prototype.save = function(make_primary) {
     var found, primary, profile, profiles, _i, _len;
     if (make_primary == null) {
@@ -157,21 +85,25 @@ Profile = (function() {
     }
     return this;
   };
+
   Profile.prototype["delete"] = function() {
     Profile["delete"](this.name);
     return null;
   };
+
   Profile.prototype.to_json = function() {
     return {
       name: this.name,
       settings: this.settings.to_json()
     };
   };
+
   Profile.primary = function() {
     var primary_name;
     primary_name = Storage.get("chrome-sdb.primary-profile");
     return Profile.find(primary_name);
   };
+
   Profile.from_json = function(json) {
     if (json) {
       return new Profile(json["name"], Settings.from_json(json["settings"]));
@@ -179,6 +111,7 @@ Profile = (function() {
       return null;
     }
   };
+
   Profile.find_all = function() {
     var name, profiles, profiles_json, settings, _ref;
     profiles_json = (_ref = Storage.get("chrome-sdb.profiles", true)) != null ? _ref : {};
@@ -192,6 +125,7 @@ Profile = (function() {
       return _results;
     })();
   };
+
   Profile.find = function(by_name) {
     var profile, profiles, _i, _len;
     profiles = Profile.find_all();
@@ -203,6 +137,7 @@ Profile = (function() {
     }
     return null;
   };
+
   Profile.profiles_json = function(profiles) {
     var profile, profiles_json, _i, _len;
     profiles_json = {};
@@ -212,24 +147,134 @@ Profile = (function() {
     }
     return profiles_json;
   };
+
   Profile.delete_all = function() {
     return Storage.set("chrome-sdb.profiles", {}, true);
   };
+
   Profile["delete"] = function(name) {
-    var i, new_profiles, profiles, _ref;
+    var i, new_profiles, profiles, _i, _ref;
     profiles = Profile.find_all();
     new_profiles = [];
-    for (i = 0, _ref = profiles.length; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
+    for (i = _i = 0, _ref = profiles.length; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
       if (profiles[i].get_name() !== name) {
         new_profiles.push(profiles[i]);
       }
     }
     return Storage.set("chrome-sdb.profiles", Profile.profiles_json(new_profiles), true);
   };
+
   return Profile;
-})();var cancel_profile, delete_profile, edit_profile, message, primary, profiles, save_profile, update_profiles_table, use_profile, validate_text_box;
+
+})();
+var after_intro;
+
+after_intro = function() {
+  Storage.set("chrome-sdb-config-intro", "true");
+  $('#create_profile_modal').modal('show');
+  return guiders.hideAll();
+};
+
+$(function() {
+  if (Storage.get("chrome-sdb-config-intro") === null) {
+    return guiders.createGuider({
+      buttons: [
+        {
+          name: "Close",
+          onclick: after_intro
+        }
+      ],
+      description: "Welcome to Simple DB Tool for Chrome.  Please setup one or more AWS Credentials to start using this tool!",
+      id: "first",
+      overlay: true,
+      title: "Chrome Simple DB Tool: Configuration"
+    }).show();
+  }
+});
+var Settings;
+
+Settings = (function() {
+
+  function Settings(access_key, secret_key, region, version, https_protocol) {
+    this.access_key = access_key;
+    this.secret_key = secret_key;
+    this.region = region != null ? region : "sdb.amazonaws.com";
+    this.version = version != null ? version : "2009-04-15";
+    this.https_protocol = https_protocol != null ? https_protocol : false;
+  }
+
+  Settings.prototype.use_access_key = function(access_key) {
+    this.access_key = access_key;
+    return this;
+  };
+
+  Settings.prototype.use_secret_key = function(secret_key) {
+    this.secret_key = secret_key;
+    return this;
+  };
+
+  Settings.prototype.use_region = function(region) {
+    this.region = region;
+    return this;
+  };
+
+  Settings.prototype.use_version = function(version) {
+    this.version = version;
+    return this;
+  };
+
+  Settings.prototype.use_https_protocol = function(true_or_false) {
+    this.https_protocol = true_or_false;
+    return this;
+  };
+
+  Settings.prototype.get_access_key = function() {
+    return this.access_key;
+  };
+
+  Settings.prototype.get_secret_key = function() {
+    return this.secret_key;
+  };
+
+  Settings.prototype.get_region = function() {
+    return this.region;
+  };
+
+  Settings.prototype.get_version = function() {
+    return this.version;
+  };
+
+  Settings.prototype.get_use_https = function() {
+    return this.https_protocol;
+  };
+
+  Settings.prototype.to_json = function() {
+    return {
+      access_key: this.access_key,
+      secret_key: this.secret_key,
+      region: this.region,
+      version: this.version,
+      https_protocol: this.https_protocol
+    };
+  };
+
+  Settings.from_json = function(json) {
+    if (json) {
+      return new Settings(json["access_key"], json["secret_key"], json["region"], json["version"], json["https_protocol"]);
+    } else {
+      return null;
+    }
+  };
+
+  return Settings;
+
+})();
+var cancel_profile, delete_profile, edit_profile, message, primary, profiles, save_profile, update_profiles_table, use_profile, validate_text_box;
+
 primary = Profile.primary();
+
 profiles = Profile.find_all();
+
 if (Profile.find_all() === []) {
   message = '<div class="alert-message warning">\n  <a id="close_message_box" class="close" href="#">×</a>\n  <p><strong>Create a profile</strong> Enter your AWS Credentials to begin.</p>\n</div>';
   $(function() {
@@ -243,6 +288,7 @@ if (Profile.find_all() === []) {
     return update_profiles_table();
   });
 }
+
 update_profiles_table = function() {
   var access_key, del, delTd, edit, editTd, name, primary_name, profile, tr, use, useTd, _i, _len, _ref, _results;
   primary = Profile.primary();
@@ -277,6 +323,7 @@ update_profiles_table = function() {
   }
   return _results;
 };
+
 save_profile = function() {
   var access_key, name, secret_key, valid;
   valid = true;
@@ -292,6 +339,7 @@ save_profile = function() {
     return update_profiles_table();
   }
 };
+
 validate_text_box = function(text_box_name, min_length, max_length) {
   var value;
   if (min_length == null) {
@@ -309,9 +357,11 @@ validate_text_box = function(text_box_name, min_length, max_length) {
     return true;
   }
 };
+
 cancel_profile = function() {
   return $('#create_profile_modal').modal('hide');
 };
+
 edit_profile = function(profile_name) {
   var profile;
   profile = Profile.find(profile_name);
@@ -320,16 +370,19 @@ edit_profile = function(profile_name) {
   $("#profile_aws_secret_key").val(profile.get_settings().get_secret_key());
   return $('#create_profile_modal').modal('show');
 };
+
 delete_profile = function(profile_name) {
   Profile["delete"](profile_name);
   return update_profiles_table();
 };
+
 use_profile = function(profile_name) {
   var profile;
   profile = Profile.find(profile_name);
   profile.make_primary();
   return update_profiles_table();
 };
+
 $(function() {
   $('#save_profile').click(function() {
     return save_profile();
