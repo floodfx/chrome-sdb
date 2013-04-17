@@ -10,14 +10,9 @@
     <link href='http://fonts.googleapis.com/css?family=Droid+Sans+Mono' rel='stylesheet' type='text/css' />
     <meta charset='utf-8' />
     <meta content='initial-scale=1.0, user-scalable=no' name='viewport' />
-    <script src='http://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js' type='text/javascript'></script>
+    <script src='js/jquery-1.8.2.min.js' type='text/javascript'></script>
     <script src='js/chrome-sdb.js' type='text/javascript'></script>
-    <script src='js/bootstrap-twipsy.js' type='text/javascript'></script>
-    <script src='js/bootstrap-popover.js' type='text/javascript'></script>
-    <script src='js/bootstrap-dropdown.js' type='text/javascript'></script>
-    <script src='js/bootstrap-scrollspy.js' type='text/javascript'></script>
-    <script src='js/bootstrap-buttons.js' type='text/javascript'></script>
-    <script src='js/bootstrap-modal.js' type='text/javascript'></script>
+    <script src='js/bootstrap.js' type='text/javascript'></script>
     <script src='js/guiders-1.2.0.js' type='text/javascript'></script>
   </head>
   <body>
@@ -53,7 +48,7 @@
         <div class='row'>
           <div class='span10 offset1' id='message_box' style='display:none;'>
             <div class='alert-message block-message error'>
-              <a class='close' href='#' onclick="$('#message_box').hide()">
+              <a class='msg_box_close close' href='#'>
                 x
               </a>
               <p>
@@ -79,7 +74,7 @@
                 </a>
               </p>
               <div class='alert-actions'>
-                <button class='btn small' onclick="$('#message_box').hide()">
+                <button class='msg_box_close btn small'>
                   Close
                 </button>
               </div>
@@ -91,7 +86,7 @@
             <div class='clearfix'>
               <h3 for='query'>
                 Query
-                <input class='btn primary pull-right' data-loading-text='Running query...' id='query_btn' onclick='query()' type='button' value='Run Query' />
+                <input class='btn primary pull-right' data-loading-text='Running query...' id='query_btn' type='button' value='Run Query' />
               </h3>
               <div class='input'>
                 <textarea class='span8' id='query_expr' name='query' rows='3'></textarea>
@@ -136,7 +131,7 @@
           <div class='span15 offset1'>
             <footer class='actions'>
               <span class='brandfont'>
-                Simple DB Tool v0.1
+                Simple DB Tool v0.2
               </span>
               |
               <a href='https://github.com/floodfx/chrome-sdb/issues'>
@@ -150,7 +145,7 @@
         <div class='row' style='width:250px'>
           <h3>
             Domains
-            <button class='btn info pull-right' data-backdrop='static' data-controls-modal='add_edit_item_attributes' id='add_item' onclick='add_item()'>
+            <button class='btn info pull-right' data-backdrop='static' data-controls-modal='add_edit_item_attributes' id='add_item'>
               Add Item
             </button>
           </h3>
@@ -171,7 +166,7 @@
           <a class='btn primary' data-backdrop='static' data-controls-modal='create_domain_modal' href='#' id='create_domain'>
             Create Domain
           </a>
-          <button class='btn warning pull-right' id='domain_deletion_control' onclick='handle_delete_toggle()'>
+          <button class='btn warning pull-right' id='domain_deletion_control'>
             Enable Delete
           </button>
         </div>
@@ -247,11 +242,11 @@
         </form>
       </div>
       <div class='modal-footer'>
-        <button class='btn info' id='save_attribute_btn' onclick='save_item()'>
+        <button class='btn info' id='save_attribute_btn'>
           Save
         </button>
         <input class='btn' id='reset_attribute_btn' type='reset' />
-        <a href='#' onclick="$('#add_edit_item_attributes').modal('hide')">
+        <a href='#' id='reset_attribute_btn_cancel'>
           Cancel
         </a>
       </div>
@@ -280,10 +275,10 @@
         </form>
       </div>
       <div class='modal-footer'>
-        <button class='btn primary' data-loading-text='Saving domain...' id='save_domain' onclick='save_domain()'>
+        <button class='btn primary' data-loading-text='Saving domain...' id='save_domain'>
           Save
         </button>
-        <button class='btn secondary' onclick="$('#create_domain_modal').modal('hide')">
+        <button class='btn secondary' id='save_domain_cancel'>
           Cancel
         </button>
       </div>
@@ -320,9 +315,54 @@
         <button class='btn warning' data-loading-text='Deleting...' disabled='disabled' id='confirm_delete_domain_btn'>
           Confirm Deletion
         </button>
-        <button class='btn secondary' onclick="$('#confirm_delete_domain_modal').modal('hide')">
+        <button class='btn secondary' id='confirm_delete_domain_cancel'>
           Cancel
         </button>
+      </div>
+    </div>
+    <div class='modal hide fade' id='item_delete_modal' style='display: none;'>
+      <div class='modal-header'>
+        <a class='close' href='#' id='close-model'>
+          x
+        </a>
+        <div id='domain_metadata_label'>
+          <h3>
+            Delete Item
+          </h3>
+        </div>
+      </div>
+      <div class='modal-body'>
+        <h2>
+          Do you really want to delete this item?
+        </h2>
+        <form>
+          <fieldset>
+            <div class='clearfix'>
+              <label for='domainName'>
+                Domain Name
+              </label>
+              <div class='input'>
+                <input class='span5' name='domain_name' type='text' />
+              </div>
+            </div>
+            <div class='clearfix'>
+              <label for='itemName'>
+                Item Name
+              </label>
+              <div class='input'>
+                <input class='span5' name='item_name' type='text' />
+              </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class='modal-footer'>
+        <a class='btn primary' href='#' id='delete_item_btn_yes'>
+          Yes
+        </a>
+        <a class='btn' href='#' id='delete_item_btn_cancel'>
+          Cancel
+        </a>
       </div>
     </div>
     <div class='modal hide fade' id='domain_metadata_modal' style='display: none;'>
@@ -391,7 +431,7 @@
         </form>
       </div>
       <div class='modal-footer'>
-        <a class='btn primary' href='#' onclick="$('#domain_metadata_modal').modal('hide')">
+        <a class='btn primary' href='#' id='metadata_btn_ok'>
           Ok
         </a>
       </div>
