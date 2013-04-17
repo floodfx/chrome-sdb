@@ -23,56 +23,107 @@ unless profile
   window.location = "config.html"
 else
   sdb = new SimpleDB(profile, false, handle_error)
-  $(()->    
+  $(()->
     update_domains_table()
   )
-  
+
 update_region = (region)->
   profile.get_settings().use_region(region)
   profile.save()
   sdb = new SimpleDB(profile, false, handle_error)
   update_domains_table()
- 
-# set region options 
+
 $(()->
+  # set region options
   for region in SimpleDB.regions()
     $("#region_select").append($('<option>', { value:region["endpoint"] }).text(region["name"]))
   $("#region_select").val(profile.get_settings().get_region())
   $("#region_select").change(()->
-    region = $("#region_select").val()    
+    region = $("#region_select").val()
     update_region(region)
   )
-)
 
-# keep domains table height optimal
-$(()->
+  # keep domains table height optimal
   $("#domain_table_div").height($(window).height()-200)
   $(window).resize(()->
     $("#domain_table_div").height($(this).height()-200)
   )
+
+  $('#query_btn').click ()->
+    query()
+
+  $('#add_item').click ()->
+    add_item()
+
+  $('#domain_deletion_control').click ()->
+    handle_delete_toggle()
+
+  $('#save_attribute_btn').click ()->
+    save_item()
+
+  $('#save_domain').click ()->
+    save_domain()
+
+  $('#save_domain_cancel').click ()->
+    $('#create_domain_modal').modal('hide')
+  
+  $('#reset_attribute_btn_cancel').click ()->
+    $('#add_edit_item_attributes').modal('hide')
+
+  $('#confirm_delete_domain_btn_cancel').click ()->
+    $('#confirm_delete_domain_modal').modal('hide')
+
+  $('#metadata_btn_ok').click ()->
+    $('#domain_metadata_modal').modal('hide')
+
+  $('.msg_box_close').click ()->
+    $('#message_box').hide()
+
+  $('#delete_item_btn_yes').click ()->
+    delete_item()
+
+  $('#delete_item_btn_cancel').click ()->
+    $('#item_delete_modal').hide();
+
+  # watch for confirm deletion and enable delete button
+  $("input[name=confirm_delete]").keydown((key)->
+    # DELET + E
+    if($("input[name=confirm_delete]").val() == "DELET" && key.keyCode == 69)
+      $("#confirm_delete_domain_btn").removeAttr("disabled").addClass("danger").removeClass("secondary")
+    else
+      $("#confirm_delete_domain_btn").attr("disabled", "disabled").addClass("secondary").removeClass("danger")
+  )
 )
 
-  
-add_domains = (domains)->  
-  if domains.length == 0
-    trs = ["<tr><td>No domains in this region</td></tr>"]
-  else
-    trs = for domain in domains      
-      controls = "<button id=\"metadata_#{domain}\" class=\"btn info\" onclick=\"metadata('#{domain}')\">metadata</a>"
-      controls += " <button id=\"delete_#{domain}\" class=\"btn\" onclick=\"confirm_delete('#{domain}')\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>"
-      "<tr><td>#{domain}<br />#{controls}</td></tr>"    
-  $("#domains_table > tbody").html(trs.join(""))    
-
-  $("#domain_select > option").remove()  
+add_domains = (domains)->
+	if domains.length == 0
+		tr = "<tr><td>No domains in this region</td></tr>"
+		$("#domains_table > tbody").html(tr)
+	else
+		$("#domains_table > tbody").html('')
+		for domain in domains
+			btn_md = $("<button id=\"metadata_#{domain}\" data-domain=\"#{domain}\" class=\"btn info\">metadata</a>")
+			btn_md.click ()->
+				metadata($(this).attr('data-domain'))
+			btn_del = $("<button id=\"delete_#{domain}\" data-domain=\"#{domain}\" class=\"btn\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>")
+			btn_del.click () ->
+				confirm_delete($(this).attr('data-domain'))
+			name = $('<a href="#">'+domain+'</a>').click ()->
+				domain_name = $(this).html()
+				$('#query_expr').val('select * from `'+domain_name+'`')
+			td = $("<td></td>").append(name).append('<br />').append(btn_md).append(btn_del)
+			tr = $("<tr></tr>").append(td)
+			$("#domains_table > tbody").append(tr)
+  $("#domain_select > option").remove()
   for domain in domains
     $("#domain_select").append($('<option>', {value:domain}).text(domain))
 
 update_domains_table = (callback=null)->
-  sdb.list_domains((res)-> 
-    add_domains(res["domains"])    
+  sdb.list_domains((res)->
+    add_domains(res["domains"])
     callback() if callback?
   )
-  
+
 add_item = ()->
   $("#domain_select").val(domain_from_query())
   $("#item_name").val("")
@@ -81,19 +132,19 @@ add_item = ()->
   $("#attr_value_is_multivalued").removeAttr("checked")
   $('#add_edit_item_label').text('Add Item')
   # $('#add_edit_item_attributes').modal('show')
-  
+
 edit_item = (domain, item, attr_name, attr_values)->
   $("#domain_select").val(domain)
   $("#item_name").val(item)
   $("#attr_name").val(attr_name)
   $("#attr_value_textarea").val(attr_values.join("\n")).attr("rows", Math.max(1,attr_values.length))
-  if(attr_values.length > 1) 
+  if(attr_values.length > 1)
     $("#attr_value_is_multivalued").attr("checked", "checked")
   else
     $("#attr_value_is_multivalued").removeAttr("checked")
   $('#add_edit_item_label').text('Edit Item')
-  $('#add_edit_item_attributes').modal('show')  
-  
+  $('#add_edit_item_attributes').modal('show')
+
 save_item = ()->
   domain_name = $("#domain_select").val()
   item_name = $("#item_name").val()
@@ -113,7 +164,7 @@ save_item = ()->
 enable_delete = ()->
   $("button[id^=delete_]").removeAttr("disabled").addClass("danger").removeClass("secondary")
   $("#domain_deletion_control").text("Disable Delete").addClass("danger").removeClass("secondary").addClass("active")
-  
+
 disable_delete = ()->
   $("button[id^=delete_]").attr("disabled", "disabled").addClass("secondary").removeClass("danger")
   $("#domain_deletion_control").text("Enable Delete").addClass("secondary").removeClass("danger").removeClass("active")
@@ -123,51 +174,52 @@ handle_delete_toggle = ()->
     disable_delete()
   else
     enable_delete()
-    
+
 domain_from_query = ()->
-  domain_match = $("#query_expr").val().match(/\`(.+)\`/) 
+  domain_match = $("#query_expr").val().match(/\`(.+)\`/)
   if(domain_match != null) then domain_match[1] else null
 
 handle_query = (results)->
-  $("#message_box").hide()
-  item_count = results.items.length
-  next_token = results.next_token
-  if next_token?    
-    next_token = next_token.replace(/\n/g, "") # replace newlines
-    $("#next_page_btn").removeAttr("disabled").attr("onclick", "query('#{next_token}')")
-  else
-    $("#next_page_btn").attr("disabled", "disabled").removeAttr("onclick")
-  
-  if item_count == 0
-    $("#query_results_table > thead").html("<tr><th>Items</th></tr>")
-    $("#query_results_table > tbody").html("<tr><td>No results...</td></tr>")
-  else
+	$("#message_box").hide()
+	item_count = results.items.length
+	next_token = results.next_token
+	if next_token?
+		next_token = next_token.replace(/\n/g, "") # replace newlines
+		$("#next_page_btn").removeAttr("disabled").click ()->
+			query(next_token)
+	else
+		$("#next_page_btn").attr("disabled", "disabled").unbind("click")
+	if item_count == 0
+		$("#query_results_table > thead").html("<tr><th>Items</th></tr>")
+		$("#query_results_table > tbody").html("<tr><td>No results...</td></tr>")
+	else
     ths = for attr_name in results.attr_names
       "<th>#{attr_name}</th>"
-    trs = for item in results.items
-      tds = for attr_name in results.attr_names  
+    $("#query_results_table > thead").html("<tr><th></th><th>Item Name</th>#{ths.join('')}</tr>")
+    $("#query_results_table > tbody").html('')
+    for item in results.items
+      tds = for attr_name in results.attr_names
         attr_vals = item.attrs[attr_name]
         if attr_vals?
-          if attr_vals.length > 1  
-            "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"true\"><table><tbody><tr><td>"+attr_vals.join("</td><td>")+"</td></tr></tbody></table></td>"
+          if attr_vals.length > 1
+            "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"true\"><table class=\"multivalued\"><tbody><tr><td>"+attr_vals.join("</td></tr><tr><td>")+"</td></tr></tbody></table></td>"
           else
             "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"false\">#{attr_vals.join('')}</td>"
-        else 
+        else
           "<td data-attr-name=\"#{attr_name}\" data-attr-multivalued=\"false\"></td>"
-      "<tr data-item-name=\"#{item.name}\"><td>#{item.name}</td>#{tds.join("")}</tr>"
-    
-    $("#query_results_table > thead").html("<tr><th>Item Name</th>#{ths.join('')}</tr>")
-    $("#query_results_table > tbody").html(trs.join(""))
+      delTd = $('<td class="delete">x</td>').click ()->
+        confirm_delete_item($(this).closest('tr').attr('data-item-name'))
+      tr = $('<tr></tr>').attr('data-item-name', item.name).append(delTd).append('<td>'+item.name+'</td>').append(tds.join(''))
+      $("#query_results_table > tbody").append(tr)
     
     # add click listener
     $("#query_results_table > tbody > tr").each((index, val)->
       # for each td
       $(val).children("td").each((jindex, tdval)->
-        #skip 0 index since it is item name
-        if(jindex > 0)
-          id = "edit_image"
-          handler_in = ()->        
-            $(this).append(" <img id=\"#{id}\" src=\"images/attr_edit.png\"/>").click(()->
+        #skip 0 and 1 index since it is item name
+        if(jindex > 1)
+          handler_in = ()->
+            $(this).addClass("edititem").dblclick(()->
               item_name = $(this).parent().attr("data-item-name")
               attr_name = $(this).attr("data-attr-name")
               is_multivalued = $(this).attr("data-attr-multivalued") == "true"
@@ -181,20 +233,18 @@ handle_query = (results)->
               edit_item(domain_from_query(), item_name, attr_name, values)
             )
           handler_out = ()->
-            $("#"+id).remove()
+            $(this).removeClass('edititem')
           $(tdval).hover(handler_in,handler_out)
-        
-      )   
-      
+      )
     )
   $("#query_btn").button('reset')
-      
-        
+
+
 query = (next_token=null)->
   query_expr = $("#query_expr").val()
   sdb.select(query_expr, handle_query, next_token)
   $("#query_btn").button('loading')
-  
+
 
 metadata = (domain)->
   sdb.domain_metadata(domain, (res)->
@@ -208,32 +258,34 @@ metadata = (domain)->
     $('#domain_metadata_modal').modal('show')
   )
 
-# watch for confirm deletion and enable delete button
-$(()->
-  $("input[name=confirm_delete]").keydown((key)->
-    # DELET + E
-    if($("input[name=confirm_delete]").val() == "DELET" && key.keyCode == 69)
-      $("#confirm_delete_domain_btn").removeAttr("disabled").addClass("danger").removeClass("secondary")
-    else
-      $("#confirm_delete_domain_btn").attr("disabled", "disabled").addClass("secondary").removeClass("danger")
+confirm_delete_item = (name)->
+  $('#item_delete_modal').find('input[name="domain_name"]').val(domain_from_query())
+  $('#item_delete_modal').find('input[name="item_name"]').val(name)
+  $('#item_delete_modal').modal('show')
+
+delete_item = ()->
+  domain = $('#item_delete_modal').find('input[name="domain_name"]').val()
+  name = $('#item_delete_modal').find('input[name="item_name"]').val()
+  sdb.delete_attributes(domain, name, {}, (res)->
+    $('#query_results_table').find('*[data-item-name="'+name+'"]').remove()
+    $('#item_delete_modal').hide()
   )
-)
 
 confirm_delete = (domain)->
-  $("#domain_delete_label").html("<h2>Delete #{domain}?</h2>")
-  $("input[name=confirm_delete]").val("")
-  $("#confirm_delete_domain_btn").attr("onclick", "delete_domain('#{domain}')")
-  $("#confirm_delete_domain_modal").modal('show')
+	$("#domain_delete_label").html("<h2>Delete #{domain}?</h2>")
+	$("input[name=confirm_delete]").val("")
+	$("#confirm_delete_domain_modal").modal('show')
+	$("#confirm_delete_domain_btn").click ()->
+		delete_domain(domain)
 
 delete_domain = (domain)->
-  $("#confirm_delete_domain_btn").button('loading')
-  sdb.delete_domain(domain, (results)->
-    update_domains_table(()->
-      $("#confirm_delete_domain_btn").button('reset')
-      disable_delete()
-    )    
-  )  
-  
+	$("#confirm_delete_domain_btn").button('loading')
+	sdb.delete_domain domain, (results)->
+		$("#confirm_delete_domain_btn").button('reset')
+		update_domains_table ()->
+			disable_delete()
+			$("#confirm_delete_domain_modal").modal('hide')
+
 # handle modal buttons
 save_domain = ()->
   #TODO validate
@@ -243,5 +295,5 @@ save_domain = ()->
     update_domains_table(()->
       $("#save_domain").button('reset')
       $('#create_domain_modal').modal('hide')
-    )    
+    )
   )

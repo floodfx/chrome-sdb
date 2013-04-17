@@ -18,3 +18,36 @@ form .clearfix2:before, form .clearfix2:after {
 form .clearfix2:after {
   clear: both;
 }
+
+img.edititem {
+  margin-left: 5px;
+}
+
+table.multivalued tr td {
+  border: 0;
+}
+table.multivalued tr {
+  border-bottom: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+table.multivalued tr:first-child {
+  border-top: 1px solid #ddd;
+}
+
+td.edititem {
+  background-color: #e7e7ff;
+}
+table#query_results_table td.delete {
+  font-family: Arial, sans-serif;
+  line-height: 18px;
+  padding: 5px;
+  width: .5em;
+  cursor: pointer;
+  vertical-align: middle;
+  color: #a8a8a8;
+}
+table#query_results_table td.delete:hover {
+  color: #404040;
+  background-color: #FDDFDE;
+}
