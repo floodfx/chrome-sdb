@@ -432,7 +432,7 @@ SimpleDB = (function() {
       result.attribute_value_count = parseInt($("AttributeValueCount", data).text());
       result.attribute_values_size_bytes = parseInt($("AttributeValuesSizeBytes", data).text());
       result.timestamp = $("Timestamp", data).text();
-      return callback(result);
+      return callback(result, {domain: domain_name});
     });
   };
 
@@ -1294,22 +1294,42 @@ add_domains = function(domains) {
     $("#domains_table > tbody").html('');
     for (_i = 0, _len = domains.length; _i < _len; _i++) {
       domain = domains[_i];
-      btn_md = $("<button id=\"metadata_" + domain + "\" data-domain=\"" + domain + "\" class=\"btn info\">metadata</a>");
-      btn_md.click(function() {
-        return metadata($(this).attr('data-domain'));
+
+      //Add progress bar and metadata in nice format
+      sdb.domain_metadata(domain, function(res, details) {
+        domain = details.domain;
+
+        btn_del = $('<button id="delete_' + domain + '" data-domain="' + domain + '" class="btn delete" disabled="disabled" style="display:none">Delete '+domain+'</button>');
+        btn_del.click(function() {
+          return confirm_delete($(this).attr('data-domain'));
+        });
+        name = $('<a href="#">' + domain + '</a>').click(function() {
+          var domain_name;
+          domain_name = $(this).html();
+          return $('#query_expr').val('select * from `' + domain_name + '`');
+        });
+
+        //How full is the domain?
+        baseStorage = res.item_names_size_bytes +
+          res.attribute_names_size_bytes +
+          res.attribute_values_size_bytes;
+        percentFull = (baseStorage / 10737418240) * 100; //10GB limit for each domain
+
+        //Build the progress bar
+        div_metadata = $('<div/>').addClass('domain-metadata').attr('data-domain', domain)
+          .append('<div class="progress progress-info">' +
+                    '<div class="bar" style="width:'+percentFull+'%"></div>' +
+                  '</div>');
+
+        td = $("<td/>").append('<div class="item-count" style="float:right; font-size:10px;">'+res.item_count+' items</div>')
+          .append(name)
+          .append(div_metadata)
+          .append(btn_del);
+        tr = $("<tr/>").attr('id', 'tr_'+domain).append(td);
+
+        $("#domains_table > tbody").append(tr);
+
       });
-      btn_del = $("<button id=\"delete_" + domain + "\" data-domain=\"" + domain + "\" class=\"btn\" disabled=\"disabled\" style=\"margin-left:5px\">delete</button>");
-      btn_del.click(function() {
-        return confirm_delete($(this).attr('data-domain'));
-      });
-      name = $('<a href="#">' + domain + '</a>').click(function() {
-        var domain_name;
-        domain_name = $(this).html();
-        return $('#query_expr').val('select * from `' + domain_name + '`');
-      });
-      td = $("<td></td>").append(name).append('<br />').append(btn_md).append(btn_del);
-      tr = $("<tr></tr>").append(td);
-      $("#domains_table > tbody").append(tr);
     }
     $("#domain_select > option").remove();
     _results = [];
@@ -1319,6 +1339,7 @@ add_domains = function(domains) {
         value: domain
       }).text(domain)));
     }
+
     return _results;
   }
 };
@@ -1384,12 +1405,12 @@ save_item = function() {
 };
 
 enable_delete = function() {
-  $("button[id^=delete_]").removeAttr("disabled").addClass("danger").removeClass("secondary");
+  $("button[id^=delete_]").removeAttr("disabled").show().addClass("danger").removeClass("secondary");
   return $("#domain_deletion_control").text("Disable Delete").addClass("danger").removeClass("secondary").addClass("active");
 };
 
 disable_delete = function() {
-  $("button[id^=delete_]").attr("disabled", "disabled").addClass("secondary").removeClass("danger");
+  $("button[id^=delete_]").attr("disabled", "disabled").addClass("secondary").removeClass("danger").hide();
   return $("#domain_deletion_control").text("Enable Delete").addClass("secondary").removeClass("danger").removeClass("active");
 };
 
